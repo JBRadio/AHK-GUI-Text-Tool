@@ -1,8 +1,34 @@
-﻿#NoTrayIcon
+﻿; AHK GUI for Text Manipulation
+; Author: James E Burns
+;
+; Types of Text Input
+;  - Line of Text (no CRLF)
+;  - Lines of Text (separated by CRLF)
+;  - 2 Sets of Lines of Text (comparing, combining, etc.) -- Pending review.
+;  - Conversion field elements (Kilograms to US Pounds, etc.) -- Pending review.
+;
+; Special Data Formats
+;  General
+;   Plain text
+;   Number Patterns (Telephone, Currency, 
+;   Text Patterns (US Address, URL, Delimiter separated data, Email, ...
+;
+;  Development
+;   WEB: JSON, XML, HTML, CSS
+;   JavaScript
+;   PHP
+;
 
+;#NoTrayIcon
+
+#SingleInstance Force
+
+#Include MyDSVTool.ahk		; Delimiter-Separated-Values Tool (CSV, TSV, etc.)
 #Include Text-to-Speech.ahk
 #Include JSON_Beautify.ahk
 ;#Include jsonFormatter.ahk ; https://autohotkey.com/board/topic/94687-jsonformatter-json-pretty-print-using-javascript/
+
+global myDSVTool := New MyDSVTool
 
 
 ; Ideas for GUI/Usage/User Feedback Improvement
@@ -78,13 +104,13 @@ GuiClose:
 Gui, Hide
 return
 
-#IfWinActive ahk_class AutoHotkeyGUI
+#IfWinActive ahk_class AutoHotkeyGUI ; Do not block Escape key usage for non-AHK GUI Applications
 ESC::
 ;ExitApp
 Gui, Hide
 return
 
-#IfWinActive
+#IfWinActive ; Restore hotkeys to work from any environment
 #4::
 Gui, Show
 return
@@ -259,6 +285,9 @@ ListViewInit:
 	LV_Add("", "Join SV Line w/ Char", "1+ Lines", "Split and join a line of text by user entered separator", "TextJoinSplittedLineWithChar")
 	LV_Add("", "Join SV Lines w/ Char", "1+ Lines", "Split and join lines of text by user entered separator", "TextJoinSplittedLinesWithChar")
 	;
+	LV_Add("", "Open Link (AHK RegEx Quick Reference)", "N/A", "Opens AHK RegEx Quick Reference page in default browser", "OpenLinkAHKRegexQuickReference")
+	LV_Add("", "Open Link (RegExr.com - RegEx Tester)", "N/A", "Opens AHK RegEx Quick Reference page in default browser", "OpenLinkRegExr")
+	;
 	LV_Add("", "Replace (AHK RegEx)", "1+ Lines", "Use AHK's RegEx to find and replace all matching text patterns", "TextReplaceRegex")
 	LV_Add("", "Replace (AHK RegEx Each Line)", "1+ Lines", "Use AHK's RegEx to find and replace text patterns line by line", "TextReplaceRegexEachLine")
 	LV_Add("", "Replace (Chars X Times)", "1+ Lines", "Replace a string of characters up to X occurrences, from left to right", "TextReplaceStringXTimes")
@@ -276,10 +305,15 @@ ListViewInit:
 	LV_Add("", "Reduce Duplicate Lines", "1+ Lines", "Reduces the amount of lines until each line is unique.", "RemoveDuplicateLines")
 	LV_Add("", "Reduce (Consecutive Repeating Lines)", "1+ Lines", "Reduces the amount of repeating duplicate lines", "RemoveRepeatingDuplicateLines")
 	LV_Add("", "Reduce (Consecutive Repeating Characters)", "1+ Lines", "Reduces the amount of repeating duplicate characters", "RemoveRepeatingDuplicateChars")
+	LV_Add("", "Reduce (Lines that include text)", "1+ Lines", "Reduces the input based on whether or not it includes text", "RemoveLinesThatIncludeText")
+	LV_Add("", "Reduce (Lines that exclude text)", "1+ Lines", "Reduces the input based on whether or not it excludes text", "RemoveLinesThatExcludeText")
+	LV_Add("", "Reduce (Lines that RegEx match)", "1+ Lines", "Reduces the input based on whether or not it excludes text", "RemoveLinesThatMatchRegEx")
+	LV_Add("", "Reduce (Lines that RegEx don't match)", "1+ Lines", "Reduces the input based on whether or not it excludes text", "RemoveLinesThatDontMatchRegEx")
 	;
-	LV_Add("", "List (Ordinal Number)", "1+ Lines", "Prefixes lines of text with ordinal numbers", "TextPrefixOrdinalNumber")
-	LV_Add("", "List (Ordinal Lowercase)", "1+ Lines", "Prefixes lines of text with ordinal lowercase letters", "TextPrefixOrdinalLowercase")
-	LV_Add("", "List (Ordinal Uppercase)", "1+ Lines", "Prefixes lines of text with ordinal uppercase letters", "TextPrefixOrdinalUppercase")
+	LV_Add("", "List (Ordinal Number)", "1+ Lines", "Prefixes lines of text with ordinal numbers. (Also see Prefix/Suffix)", "TextPrefixOrdinalNumber")
+	LV_Add("", "List (Ordinal Lowercase)", "1+ Lines", "Prefixes lines of text with ordinal lowercase letters. (Also see Prefix/Suffix)", "TextPrefixOrdinalLowercase")
+	LV_Add("", "List (Ordinal Uppercase)", "1+ Lines", "Prefixes lines of text with ordinal uppercase letters. (Also see Prefix/Suffix)", "TextPrefixOrdinalUppercase")
+	LV_Add("", "List (Unordered Custom Character)", "1+ Lines", "Prefixes lines of text with a custom character. (Also see Prefix/Suffix)", "TextPrefixCustomRepeatingCharacter")
 	;
 	LV_Add("", "Trim (Both)", "1+ Lines", "Removes whitespace before and after text", "TextTrim")
 	LV_Add("", "Trim (Left)", "1+ Lines", "Removes whitespace before text", "TextTrimLeft")
@@ -294,8 +328,8 @@ ListViewInit:
 	LV_Add("", "Speak (Stop)", "1+ Lines", "Stop using Windows Speak", "TextSayStop")
 	;
 	LV_Add("", "Prefix/Suffix (Matching)", "1+ Lines", "Surround text block with matching symbols", "TextSurroundingChar")
-	LV_Add("", "Prefix/Suffix Remove", "1+ Lines", "Remove Prefix/Suffix of text from each line", "TextPrefixSuffixRemoveEachLine")
-	LV_Add("", "Prefix/Suffix Lines", "1+ Lines", "Add Prefix/Suffix of text to each line", "TextPrefixSuffixEachLine")
+	LV_Add("", "Prefix/Suffix Remove (Text or RegEx)", "1+ Lines", "Remove Prefix/Suffix of text from each line", "TextPrefixSuffixRemoveEachLine")
+	LV_Add("", "Prefix/Suffix Lines", "1+ Lines", "Adds a custom Prefix/Suffix of text to each line", "TextPrefixSuffixEachLine")
 	;
 	LV_Add("", "HTML (Add Tag)", "1+ Lines", "Surround text with user defined HTML tag", "TextSurroundingHTMLTag")
 	LV_Add("", "HTML (Add Tag Each Line)", "1+ Lines", "Surround text on each line with defined HTML tag", "TextSurroundingHTMLTagEachLine")
@@ -320,24 +354,6 @@ ListViewInit:
 	;LV_Add("", "Function", "1+ Lines", "Desc", "FunctionName")
 	
 return
-
-LBTextTypes:
-ListBoxTextTypeList =
-(LTrim Join|
-Line (Single)|
-Line (Multiple)
-CSV
-TSV
-)
-return
-
-LBTextFunctions:
-ListBoxTextFunctionList =
-(LTrim Join|
-Convert (Uppercase)
-)
-return
-
 
 TextAnalysisCount(UserInput) {
 	; Mango.ahk
@@ -805,7 +821,9 @@ HelperGetSVDataIntoRowsArray(data, delim)
 
 HelperExtractColumnDataForAnySV(data, delim)
 {
-	arrRows := HelperGetSVDataIntoRowsArray(data, delim)
+	;arrRows := HelperGetSVDataIntoRowsArray(data, delim)
+	myDSVTool.loadText(data)
+	arrRows := myDSVTool.getData()
 
 	; Ask user to pick a column to extract
 	intColumns := arrRows[1].Length()
@@ -823,6 +841,7 @@ HelperExtractColumnDataForAnySV(data, delim)
 		InputBox, OutputVar, Enter Data for ..., %Prompt%, %HIDE%, %Width%, %Height%, %X%, %Y%, , %Timeout%, %Dft%
 	}
 
+	/*
 	NewLine := "`r`n"
 	retValue := 
 	
@@ -831,6 +850,10 @@ HelperExtractColumnDataForAnySV(data, delim)
 
 	retValue := SubStr(retValue, StrLen(NewLine) + 1)
 	return retValue
+	*/
+	
+	myDSVTool.extractColumnData(OutputVar)
+	return myDSVTool.getResult()
 }
 
 SwapColumnForCSV(UserInput)
@@ -1532,6 +1555,17 @@ TextJoinSplittedLinesWithChar(UserInput) {
 	;}
 }
 
+OpenLinkAHKRegexQuickReference()
+{
+	Run, https://www.autohotkey.com/docs/misc/RegEx-QuickRef.htm
+}
+
+OpenLinkRegExr()
+{
+	Run, https://regexr.com/
+}
+
+
 TextMakeWindowsFileFriendly(UserInput) {
 	; "A file name can't contain any of the following characters: \ / : * ? " < > |
 	
@@ -1561,6 +1595,52 @@ TextMakeWindowsFileFriendly(UserInput) {
 	;}
 }
 
+TextPrefixCustomRepeatingCharacter(UserInput){
+	; Prefix each line of text with an ordinal number
+	;  Purpose:
+	;   Make a simple text listing wherever needed.
+	;  
+	;  * Also removes blank lines as the return value is built during loop process.
+	;
+	;  Conditions:
+	;   A.) If there is text on the line, put prefix right in front of text (indented text for example)
+	;   B.) If there is no text on the line, skip it. (Create another function to number blank lines if needed, add "Blank" to the end of the name)
+	;
+	;  Ex:
+	;   Text Line Item\r\n  --> 1. Text Line Item
+	;   Text Line Item\r\n  --> 2. Text Line Item
+	;   Text Line Item\r\n  --> 3. Text Line Item
+	
+	Prompt = "Enter custom character for Text List conversion"
+	InputBox, OutputVar, Enter Data for ..., %Prompt%, %HIDE%, %Width%, %Height%, %X%, %Y%, , %Timeout%, %Dft%
+	
+	if ( StrLen(OutputVar) < 1 or OutputVar == )
+	{
+		SetStatusMessageAndColor("Invalid user input (TextPrefixCustomRepeatingCharacter).", "Red")
+		return
+	}
+	
+	NewLine := "`r`n"
+	vCustomChar := OutputVar
+	OrdinalText := vCustomChar . A_Space
+	Text := UserInput
+	@ := ""
+	
+	Loop, Parse, Text, `n, `r 
+	{
+		; First see if there is text. Then, prefix the text part only (for example, indented text)
+		MatchedPosition := RegExMatch(A_LoopField, "O)([\S].+)", RegExMatchOutputVar)
+		if ( RegExMatchOutputVar.Count() > 0 )
+		{	
+			@ .= NewLine
+			@ .= RegExReplace(A_LoopField, "([\S].+)", OrdinalText . "$1" )
+		}
+	}
+	
+	SetStatusMessageAndColor("Created list with Unordered Custom Character.", "Green")
+	return SubStr(@, StrLen(NewLine) + 1)
+}
+
 TextPrefixOrdinalNumber(UserInput) {
 	; Prefix each line of text with an ordinal number
 	;  Purpose:
@@ -1582,27 +1662,22 @@ TextPrefixOrdinalNumber(UserInput) {
 	
 	Text := UserInput
 	
-	;If ("" <> Text := Clip()) {
-		@ := ""
-		Loop, Parse, Text, `n, `r 
-		{
-			; First see if there is text. Then, prefix the text part only (for example, indented text)
-			MatchedPosition := RegExMatch(A_LoopField, "O)([\S].+)", RegExMatchOutputVar)
-			if ( RegExMatchOutputVar.Count() > 0 )
-			{	
-				OrdinalText := Numeral . ". "
-				;@ .= NewLine Numeral ". " A_LoopField
-				@ .= NewLine
-				@ .= RegExReplace(A_LoopField, "([\S].+)", OrdinalText . "$1" )
-				Numeral += 1
-			}
-	    }
-	
-		;Clip(SubStr(@, StrLen(NewLine) + 1), 2)
-		;Clip(@,2)
-		SetStatusMessageAndColor("Done.", "Green")
-		return SubStr(@, StrLen(NewLine) + 1)
-	;}
+	@ := ""
+	Loop, Parse, Text, `n, `r 
+	{
+		; First see if there is text. Then, prefix the text part only (for example, indented text)
+		MatchedPosition := RegExMatch(A_LoopField, "O)([\S].+)", RegExMatchOutputVar)
+		if ( RegExMatchOutputVar.Count() > 0 )
+		{	
+			OrdinalText := Numeral . ". "
+			@ .= NewLine
+			@ .= RegExReplace(A_LoopField, "([\S].+)", OrdinalText . "$1" )
+			Numeral += 1
+		}
+	}
+
+	SetStatusMessageAndColor("Created list with ordered numbers.", "Green")
+	return SubStr(@, StrLen(NewLine) + 1)
 }
 
 TextPrefixOrdinalLowercase(UserInput) {
@@ -1626,27 +1701,23 @@ TextPrefixOrdinalLowercase(UserInput) {
 	
 	Text := UserInput
 	
-	;If ("" <> Text := Clip()) {
-		@ := ""
-		Loop, Parse, Text, `n, `r 
-		{
-			; First see if there is text. Then, prefix the text part only (for example, indented text)
-			MatchedPosition := RegExMatch(A_LoopField, "O)([\S].+)", RegExMatchOutputVar)
-			if ( RegExMatchOutputVar.Count() > 0 )
-			{	
-				OrdinalText := Chr(Numeral) . ". "
-				;@ .= NewLine Numeral ". " A_LoopField
-				@ .= NewLine
-				@ .= RegExReplace(A_LoopField, "([\S].+)", OrdinalText . "$1" )
-				Numeral += 1
-			}
-	    }
-	
-		;Clip(SubStr(@, StrLen(NewLine) + 1), 2)
-		;Clip(@,2)
-		SetStatusMessageAndColor("Done.", "Green")
-		return SubStr(@, StrLen(NewLine) + 1)
-	;}
+	@ := ""
+	Loop, Parse, Text, `n, `r 
+	{
+		; First see if there is text. Then, prefix the text part only (for example, indented text)
+		MatchedPosition := RegExMatch(A_LoopField, "O)([\S].+)", RegExMatchOutputVar)
+		if ( RegExMatchOutputVar.Count() > 0 )
+		{	
+			OrdinalText := Chr(Numeral) . ". "
+			;@ .= NewLine Numeral ". " A_LoopField
+			@ .= NewLine
+			@ .= RegExReplace(A_LoopField, "([\S].+)", OrdinalText . "$1" )
+			Numeral += 1
+		}
+	}
+
+	SetStatusMessageAndColor("Created list with lowercase letters.", "Green")
+	return SubStr(@, StrLen(NewLine) + 1)
 }
 
 TextPrefixOrdinalUppercase(UserInput) {
@@ -1688,7 +1759,7 @@ TextPrefixOrdinalUppercase(UserInput) {
 	
 		;Clip(SubStr(@, StrLen(NewLine) + 1), 2)
 		;Clip(@,2)
-		SetStatusMessageAndColor("Done.", "Green")
+		SetStatusMessageAndColor("Created list with uppercase letters.", "Green")
 		return SubStr(@, StrLen(NewLine) + 1)
 	;}
 }
@@ -1712,7 +1783,7 @@ TextReplaceCharsNewLine(UserInput){
 		return
 	}
 	
-	SetStatusMessageAndColor("Done.", "Green")
+	SetStatusMessageAndColor("Replaced text with new line.", "Green")
 	return vAltText
 }
 
@@ -1743,7 +1814,7 @@ TextReplaceRegex(UserInput){
 		return
 	}
 	
-	SetStatusMessageAndColor("Done.", "Green")
+	SetStatusMessageAndColor("Replaced text with string (RegEx).", "Green")
 	return vAltText
 }
 
@@ -1772,19 +1843,16 @@ TextReplaceRegexEachLine(UserInput){
 	Loop, Parse, Text, `n, `r
 	{
 		@ .= NewLine RegExReplace(A_LoopField, vUserRegex, vUserReplacement)
-		;vAltText := RegExReplace(vText, vUserRegex, vUserReplacement)
-		;MsgBox % vText
-		;MsgBox % vAltText
 		If ErrorLevel
 		{
-			MsgBox, "(TextReplaceRegex) There was an issue."
+			;MsgBox, "(TextReplaceRegexEachLine) There was an issue."
+			SetStatusMessageAndColor("There was an issue with the entered Regular Expression.", "Red")
 			return
 		}
 	}
 	
-	SetStatusMessageAndColor("Done.", "Green")
+	SetStatusMessageAndColor("Replaced text on each line (RegEx).", "Green")
 	return SubStr(@, StrLen(NewLine) + 1)
-	;return vAltText
 }
 
 
@@ -1812,15 +1880,14 @@ TextReplaceStringXTimes(UserInput){
 		vUserReplacement := ""
 
 	vAltText := StrReplace(vText, vUserFind, vUserReplacement,, vUserNumber)
-	;MsgBox % vText
-	;MsgBox % vAltText
+
 	If ErrorLevel
 	{
 		MsgBox, "(TextReplaceStringXTimes) There was an issue."
 		return
 	}
-	
-	SetStatusMessageAndColor("Done.", "Green")
+	vStatusText := "String replaced " vUserNumber " time(s)."
+	SetStatusMessageAndColor(vStatusText, "Green")
 	return vAltText
 }
 
@@ -1891,8 +1958,7 @@ TextReplaceLastStringOccurrenceEachLine(UserInput)
 	vReplace := OutputVar
 	
 	vResult := HelperLoopEachLineCallFunction(vText, "CallbackReplaceLastOccurrence", vFind, vReplace)
-	;MsgBox % vResult
-	SetStatusMessageAndColor("Done.", "Green")
+	SetStatusMessageAndColor("Replaced last occurrence (Each Line).", "Green")
 	return vResult
 }
 
@@ -1914,7 +1980,7 @@ TextReplaceFirstStringOccurrenceEachLine(UserInput)
 	vReplace := OutputVar
 	
 	vResult := HelperLoopEachLineCallFunction(vText, "CallbackReplaceFirstOccurrence", vFind, vReplace)
-	SetStatusMessageAndColor("Done.", "Green")
+	SetStatusMessageAndColor("Replaced first occurrence (Each Line).", "Green")
 	return vResult
 }
 
@@ -1936,10 +2002,13 @@ TextReplaceLastStringOccurrence(UserInput)
 	
 	vFoundPos := InStr(vText, vFind,0,0) ; Find last occurrence ; Return 0 if not found
 	
-	if ( vFoundPos )
+	if ( vFoundPos ) {
+		SetStatusMessageAndColor("Replaced last occurrence.", "Green")
 		return RegExReplace(vText, vFind, vReplace, 0, 1, vFoundPos) ; 
-	else
+	} else {
+		SetStatusMessageAndColor("Could not find text.", "Green")
 		return vText
+	}
 }
 
 TextReplaceFirstStringOccurrence(UserInput)
@@ -1966,6 +2035,7 @@ TextReplaceFirstStringOccurrence(UserInput)
 	else
 		return vText
 	*/
+	SetStatusMessageAndColor("Replaced first occurrence.", "Green")
 	return RegExReplace(vText, vFind, vReplace,,1)
 }
 
@@ -1981,7 +2051,7 @@ TextTrim(UserInput) {
 		@ .= NewLine Text := Trim(A_LoopField)
 	}
 	
-	SetStatusMessageAndColor("Done.", "Green")
+	SetStatusMessageAndColor("Trimmed text.", "Green")
 	return SubStr(@, StrLen(NewLine) + 1)
 }
 
@@ -1996,7 +2066,7 @@ TextTrimLeft(UserInput) {
 		@ .= NewLine Text := LTrim(A_LoopField)
 	}
 	
-	SetStatusMessageAndColor("Done.", "Green")
+	SetStatusMessageAndColor("Trimmed left of Text.", "Green")
 	return SubStr(@, StrLen(NewLine) + 1)
 }
 
@@ -2011,7 +2081,7 @@ TextTrimRight(UserInput) {
 		@ .= NewLine Text := RTrim(A_LoopField)
 	}
 	
-	SetStatusMessageAndColor("Done.", "Green")
+	SetStatusMessageAndColor("Trimmed right of Text.", "Green")
 	return SubStr(@, StrLen(NewLine) + 1)
 }
 
@@ -2027,7 +2097,7 @@ TextRemoveSpaces(UserInput) {
 		}
 		
 		;Clip(SubStr(@, StrLen(NewLine) + 1), 2)
-		SetStatusMessageAndColor("Done.", "Green")
+		SetStatusMessageAndColor("Removed spaces.", "Green")
 		return SubStr(@, StrLen(NewLine) + 1)
 	;}
 }
@@ -2044,7 +2114,7 @@ TextReplaceSpacesUnderscore(UserInput) {
 		}
 		
 		;Clip(SubStr(@, StrLen(NewLine) + 1), 2)
-		SetStatusMessageAndColor("Done.", "Green")
+		SetStatusMessageAndColor("Replaced spaces with underscores.", "Green")
 		return SubStr(@, StrLen(NewLine) + 1)
 	;}
 }
@@ -2061,7 +2131,7 @@ TextReplaceSpacesDash(UserInput) {
 		}
 		
 		;Clip(SubStr(@, StrLen(NewLine) + 1), 2)
-		SetStatusMessageAndColor("Done.", "Green")
+		SetStatusMessageAndColor("Replaced spaces with dashes.", "Green")
 		return SubStr(@, StrLen(NewLine) + 1)
 	;}
 }
@@ -2077,7 +2147,7 @@ RemoveBlankLines(UserInput)
 			break
 	}
 	
-	SetStatusMessageAndColor("Done.", "Green")
+	SetStatusMessageAndColor("Removed blank lines.", "Green")
 	return Text
 }
 
@@ -2087,7 +2157,7 @@ RemoveDuplicateLines(UserInput)
 	trimmedArray := HelperTrimArray(arrLines)
 	joinLines := Join(trimmedArray, "`n")
 	
-	SetStatusMessageAndColor("Done.", "Green")
+	SetStatusMessageAndColor("Removed duplicate lines.", "Green")
 	return SubStr(joinLines, 1, StrLen(joinLines) - StrLen("`n") + 1)
 }
 
@@ -2116,7 +2186,7 @@ RemoveRepeatingDuplicateLines(UserInput)
 	
 	TextMinusDelim := StrLen(Text) - StrLen("`n")
 	
-	SetStatusMessageAndColor("Done.", "Green")
+	SetStatusMessageAndColor("Removed repeating lines.", "Green")
 	return SubStr(Text, 1, TextMinusDelim)
 }
 
@@ -2130,10 +2200,185 @@ RemoveRepeatingDuplicateChars(UserInput)
 	
 	Text := UserInput
 	
-	SetStatusMessageAndColor("Done.", "Green")
+	SetStatusMessageAndColor("Removed repeating characters.", "Green")
 	return st_removeDuplicates(Text, OutputVar)
 }
 
+HelperRemoveLinesIncludeExcludeText(vText, vNeedle, vChoice)
+{
+	; 1 = Include Text (remove)
+	; 2 = Exclude Text (remove)
+	
+	if (vChoice < 1)
+		vChoice := 1
+	
+	if (vChoice > 2)
+		vChoice := 2
+	
+	if (vText == "" or StrLen(Trim(vText)) == 0)
+		return ; No data to process
+	
+	NewLine := "`r`n"
+	@ :=
+	Loop, Parse, vText, `n, `r
+	{
+		
+		if (vChoice == 1){ ; Skip if line includes text
+			If InStr(A_LoopField, vNeedle)
+				continue
+			Else
+				@ .= NewLine A_LoopField
+			
+		} else if (vChoice == 2){ ; Skip line if it excludes text
+			If InStr(A_LoopField, vNeedle)
+				@ .= NewLine A_LoopField
+			Else
+				continue
+		}
+	}
+	
+	return SubStr(@, StrLen(NewLine) + 1)
+}
+
+RemoveLinesThatIncludeText(UserInput)
+{
+	Prompt = "Remove text lines that include what characters?"
+	InputBox, OutputVar, Enter Data for ..., %Prompt%, %HIDE%, %Width%, %Height%, %X%, %Y%, , %Timeout%, %Dft%
+	
+	if ( StrLen(OutputVar) == 0 )
+	{
+		SetStatusMessageAndColor("Character(s) input cannot be nothing.", "Red")
+		return
+	}
+	
+	if ( InStr(UserInput, OutputVar) == false )
+	{
+		SetStatusMessageAndColor("Character(s) should be in string.", "Red")
+		return
+	}
+	
+	vText := UserInput
+	vChoice := 1
+	vNeedle := OutputVar
+	vResult := HelperRemoveLinesIncludeExcludeText(vText, vNeedle, vChoice)
+	
+	if ( StrLen(vResult) == 0 )
+		SetStatusMessageAndColor("All lines included the text.", "Green")
+	else
+		SetStatusMessageAndColor("Removed lines that included the text.", "Green")
+	
+	return vResult
+}
+
+RemoveLinesThatExcludeText(UserInput)
+{
+	Prompt = "Remove text lines that exclude what characters?"
+	InputBox, OutputVar, Enter Data for ..., %Prompt%, %HIDE%, %Width%, %Height%, %X%, %Y%, , %Timeout%, %Dft%
+	
+	if ( StrLen(OutputVar) == 0 )
+	{
+		SetStatusMessageAndColor("Character(s) input cannot be nothing.", "Red")
+		return
+	}
+	
+	vText := UserInput
+	vChoice := 2
+	vNeedle := OutputVar
+	vResult := HelperRemoveLinesIncludeExcludeText(vText, vNeedle, vChoice)
+	
+	if ( StrLen(vResult) == 0 )
+		SetStatusMessageAndColor("All lines excluded the text.", "Green")
+	else
+		SetStatusMessageAndColor("Removed lines that excluded the text.", "Green")
+	
+	return vResult
+}
+
+HelperRemoveLinesMatchDontMatchRegEx(vText, vRegEx, vChoice)
+{
+	; 1 = Match RegEx (remove)
+	; 2 = Not Match RegEx (remove)
+	
+	if (vChoice < 1)
+		vChoice := 1
+	
+	if (vChoice > 2)
+		vChoice := 2
+	
+	if (vText == "" or StrLen(Trim(vText)) == 0)
+		return ; No data to process
+	
+	NewLine := "`r`n"
+	@ :=
+	Loop, Parse, vText, `n, `r
+	{
+		
+		if (vChoice == 1){ ; Skip if line includes text
+			If RegExMatch(A_LoopField, vRegEx)
+				continue
+			Else
+				@ .= NewLine A_LoopField
+			
+		} else if (vChoice == 2){ ; Skip line if it excludes text
+			If RegExMatch(A_LoopField, vRegEx)
+				@ .= NewLine A_LoopField
+			Else
+				continue
+		}
+	}
+	
+	return SubStr(@, StrLen(NewLine) + 1)
+}
+
+RemoveLinesThatMatchRegEx(UserInput)
+{
+	Prompt := "Remove text lines that match what Regular Expression?"
+	InputBox, OutputVar, Enter Data for ..., %Prompt%, %HIDE%, %Width%, %Height%, %X%, %Y%, , %Timeout%, %Dft%
+	
+	if ( StrLen(OutputVar) == 0 )
+	{
+		SetStatusMessageAndColor("Regular Expression input cannot be nothing.", "Red")
+		return
+	}
+	
+	vText := UserInput
+	vChoice := 1
+	vNeedle := OutputVar
+	vResult := HelperRemoveLinesMatchDontMatchRegEx(vText, vNeedle, vChoice)
+	
+	if ( StrLen(vResult) == 0 )
+		SetStatusMessageAndColor("All lines matched the regular expression.", "Green")
+	else
+		SetStatusMessageAndColor("Removed lines that matched RegEx.", "Green")
+	
+	return vResult
+}
+
+RemoveLinesThatDontMatchRegEx(UserInput)
+{
+	Prompt := "Remove text lines that don't match what regular expression?"
+	InputBox, OutputVar, Enter Data for ..., %Prompt%, %HIDE%, %Width%, %Height%, %X%, %Y%, , %Timeout%, %Dft%
+	
+	if ( StrLen(OutputVar) == 0 )
+	{
+		SetStatusMessageAndColor("Regular Expression input cannot be nothing.", "Red")
+		return
+	}
+	
+	vText := UserInput
+	vChoice := 2
+	vNeedle := OutputVar
+	vResult := HelperRemoveLinesMatchDontMatchRegEx(vText, vNeedle, vChoice)
+	
+	if ( StrLen(vResult) == 0 )
+		SetStatusMessageAndColor("All lines didn't match the regular expression.", "Green")
+	else
+		SetStatusMessageAndColor("Removed lines that don't match RegEx.", "Green")
+	
+	return vResult
+}
+
+;; ---------------
 
 /*
 String Things - Common String & Array Functions by Tidbit
@@ -2152,8 +2397,6 @@ output:  aaa|bbb|ccc|ddd
 st_removeDuplicates(string, delim="`n")
 {
    delim:=RegExReplace(delim, "([\\.*?+\[\{|\()^$])", "\$1")
-   
-   SetStatusMessageAndColor("Done.", "Green")
    Return RegExReplace(string, "(" delim ")+", "$1")
 }
 
@@ -2202,6 +2445,7 @@ TextPadSpaceLeft(UserInput)
 	}
 	
 	vText := HelperPadSpacesLeftOrRight(OutputVar, UserInput, "Left")
+	SetStatusMessageAndColor("Padded with spaces (Left).", "Green")
 	return vText
 }
 
@@ -2217,6 +2461,7 @@ TextPadSpaceRight(UserInput)
 	InputBox, OutputVar, Enter Data for ..., %Prompt%, %HIDE%, %Width%, %Height%, %X%, %Y%, , %Timeout%, %Dft%
 	
 	vText := HelperPadSpacesLeftOrRight(OutputVar, UserInput, "Right")
+	SetStatusMessageAndColor("Padded with spaces (Right).", "Green")
 	return vText
 }
 
@@ -2289,7 +2534,7 @@ TextPadLeftCharLineUp(UserInput)
 	}
 	
 	;Clip(SubStr(@, StrLen(NewLine) + 1), 2)
-	SetStatusMessageAndColor("Done.", "Green")
+	SetStatusMessageAndColor("Padded lines to align text to character.", "Green")
 	return SubStr(@, StrLen(NewLine) + 1)
 }
 
@@ -2353,7 +2598,7 @@ TextCharLineUp(UserInput) {
 			}
 			
 			;Clip(SubStr(@, StrLen(NewLine) + 1), 2)
-			SetStatusMessageAndColor("Done.", "Green")
+			SetStatusMessageAndColor("Padded text to align to character.", "Green")
 			return SubStr(@, StrLen(NewLine) + 1)
 		}
 	;}
@@ -2371,7 +2616,7 @@ TextSay(UserInput)
 			
 			AnnaVoice := TTS_CreateVoice("Microsoft Anna")
 			TTS(AnnaVoice, "SpeakWait", Text)
-			SetStatusMessageAndColor("Done.", "Green")
+			SetStatusMessageAndColor("Text spoken.", "Green")
 		}
 		else {
 			;MsgBox,,"Text.ahk",No text available in the clipboard to say
@@ -2416,7 +2661,7 @@ TextSurroundingChar(UserInput) {
 			
 			;Send %OutputVar%%Text%%Ending%
 			;Clip(OutputVar . Text . Ending)
-			SetStatusMessageAndColor("Done.", "Green")
+			SetStatusMessageAndColor("Surrounded Text with character.", "Green")
 			return OutputVar . Text . Ending
 		}
 	;}
@@ -2468,7 +2713,7 @@ TextPrefixSuffixRemoveEachLine(UserInput) {
 		;MsgBox % @
 		;Clip(@)
 		retValue := SubStr(@, StrLen(NewLine) +1) ; Remove last new line (`r`n) or blank line
-		SetStatusMessageAndColor("Done.", "Green")
+		SetStatusMessageAndColor("Removed Prefix/Suffix (Text/RegEx).", "Green")
 		return retValue
 	;}
 }
@@ -2510,7 +2755,7 @@ TextPrefixSuffixEachLine(UserInput){
 			
 			;Clip(@)
 			retValue := SubStr(@, StrLen(NewLine) + 1) ; Remove last new line (`r`n) or blank line
-			SetStatusMessageAndColor("Done.", "Green")
+			SetStatusMessageAndColor("Added Prefix/Suffix.", "Green")
 			return retValue
 		}
 	;}
@@ -2534,7 +2779,7 @@ TextSurroundingHTMLTag(UserInput){
 			;Clip("<" . OutputVar . ">" . Text . "</" . OutputVar . ">")
 			retValue := "<" . OutputVar . ">" . Text . "</" . OutputVar . ">"
 			
-			SetStatusMessageAndColor("Done.", "Green")
+			SetStatusMessageAndColor("Wrapped Text with HTML tag.", "Green")
 			return retValue
 		}
 	;}
@@ -2568,7 +2813,7 @@ TextSurroundingHTMLTagEachLine(UserInput){
 			;return @
 			retValue := SubStr(@, StrLen(NewLine) +1) ; Remove last new line (`r`n) or blank line
 			
-			SetStatusMessageAndColor("Done.", "Green")
+			SetStatusMessageAndColor("HTML Wrapped each line.", "Green")
 			return retValue
 		}
 	;}
@@ -2583,7 +2828,7 @@ TextSortAlphabetically(UserInput) {
 		Sort, Text, ; Normal sort
 		;Clip(Text)
 		
-		SetStatusMessageAndColor("Done.", "Green")
+		SetStatusMessageAndColor("Sorted alphabetically.", "Green")
 		return Text
 	;}
 }
@@ -2597,7 +2842,7 @@ TextSortAlphabeticallyUnique(UserInput) {
 		Sort, Text, C U ; Normal sort
 		;Clip(Text)
 		
-		SetStatusMessageAndColor("Done.", "Green")
+		SetStatusMessageAndColor("Unique Sort Alphabetically.", "Green")
 		return Text
 	;}
 }
@@ -2610,7 +2855,7 @@ TextSortAlphabeticallyUniqueCaseInsensitive(UserInput) {
 		Sort, Text, U ; Normal sort
 		;Clip(Text)
 		
-		SetStatusMessageAndColor("Done.", "Green")
+		SetStatusMessageAndColor("Unique Sort Alphabetically Case Insensitive.", "Green")
 		return Text
 	;}
 }
@@ -2631,7 +2876,7 @@ TextSortAlphabeticallyWithDelimiter(UserInput) {
 			Sort, Text, D%OutputVar% ; Alphabetically sort for words/text separated by a delimiter
 			;Clip(Text)
 			
-			SetStatusMessageAndColor("Done.", "Green")
+			SetStatusMessageAndColor("Sorted alphabetically with delimiter.", "Green")
 			return Text
 		}
 	;}
@@ -2645,7 +2890,7 @@ TextSortNumericAscending(UserInput) {
 		Sort, Text, N ; Numeric Sort
 		;Clip(Text)
 		
-		SetStatusMessageAndColor("Done.", "Green")
+		SetStatusMessageAndColor("Sorted Numeric Ascending.", "Green")
 		return Text
 	;}
 }
@@ -2658,7 +2903,7 @@ TextSortNumericDescending(UserInput) {
 		Sort, Text, R N ; Reverse Numeric Sort
 		;Clip(Text)
 		
-		SetStatusMessageAndColor("Done.", "Green")
+		SetStatusMessageAndColor("Sorted Numeric Descending.", "Green")
 		return Text
 	;}
 }
@@ -2678,7 +2923,7 @@ TextSortNumericWithDelimiter(UserInput) {
 			Sort, Text, N D%OutputVar% ; Numeric Sort
 			;Clip(Text)
 			
-			SetStatusMessageAndColor("Done.", "Green")
+			SetStatusMessageAndColor("Sorted Delimiter Numeric Data.", "Green")
 			return Text
 		}
 	;}
@@ -2692,7 +2937,7 @@ TextSortReverse(UserInput) {
 		Sort, Text, R ; Sort and then Reverse
 		;Clip(Text)
 		
-		SetStatusMessageAndColor("Done.", "Green")
+		SetStatusMessageAndColor("Reverse sorted.", "Green")
 		return Text
 	;}
 }
@@ -2705,7 +2950,7 @@ TextSortReverseOrder(UserInput) {
 		Sort, Text, F HelperReverseDirection ; Reverse order
 		;Clip(Text)
 		
-		SetStatusMessageAndColor("Done.", "Green")
+		SetStatusMessageAndColor("Reverse ordered.", "Green")
 		return Text
 	;}
 }
@@ -2730,7 +2975,7 @@ TextSortReverseWithDelimiter(UserInput) {
 			Sort, Text, R D%OutputVar% ; Sort and then Reverse
 			;Clip(Text)
 			
-			SetStatusMessageAndColor("Done.", "Green")
+			SetStatusMessageAndColor("Sort reversed delimiter text.", "Green")
 			return Text
 		}
 	;}
@@ -2745,7 +2990,7 @@ TextSortRandom(UserInput)
 		Sort, Text, Random ; Random sort text
 		;Clip(Text)
 		
-		SetStatusMessageAndColor("Done.", "Green")
+		SetStatusMessageAndColor("Random sorted.", "Green")
 		return Text
 	;}
 }
@@ -2771,7 +3016,7 @@ UrlDownloadToTextFileAndOpen(UserInput){
 		FileRead, vFileReadOutput, vFilename
 		;MsgBox % vFileReadOutput
 		
-		SetStatusMessageAndColor("Done.", "Green")
+		SetStatusMessageAndColor("Downloaded to text file.", "Green")
 		return vFileReadOutput
 	}
 	catch e
@@ -2789,5 +3034,5 @@ WindowsRun(UserInput){
 	;MsgBox % Commands[1]
 	Command := Commands[1]
 	Run, %Command%
-	SetStatusMessageAndColor("Done.", "Green")
+	SetStatusMessageAndColor("Sent text to Windows Run.", "Green")
 }
