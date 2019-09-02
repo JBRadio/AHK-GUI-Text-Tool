@@ -9,7 +9,7 @@
  *    
 */
 
-#Include JSON_FromObj.ahk
+;#Include JSON_FromObj.ahk - Included in Main Script
 
 JSON_Uglify(JSON) {
 	if IsObject(JSON) {

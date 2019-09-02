@@ -121,6 +121,10 @@ ListViewInitProg:
 	;
 	LV_Add("", "CSV (To <table>)", "CSV", "Convert CSV to html table code", "CsvToHtmlTable")
 	;
+    LV_Add("", "File (List Properties)", "N/A", "Returns a list of properties for the file chosen in the file dialog box.", "FileGetProperties")
+	;
+	;LV_Add("", "Show List (Windows Extended Properties)", "N/A", "Launches a child window to display list of information.", "ShowListOfWindowsExtendedProperties")
+	;
 	LV_Add("", "Generate Text (Lorem Ipsum)", "N/A", "Returns sample text (Lorem Ipsum) to use for testing.", "TextGenerateLoremIpsum")	; From General
 	; Generate Text (GUID)
 	;

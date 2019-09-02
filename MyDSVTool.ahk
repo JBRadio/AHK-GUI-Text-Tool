@@ -70,7 +70,10 @@ Class MyDSVTool
 	
 		Loop, Parse, data, `n, `r
 		{
-			Columns := StrSplit(A_LoopField, delim)
+			if ( delim == "\t" or delim == "`t" )
+				Columns := StrSplit(A_LoopField, "`t")
+			else
+				Columns := StrSplit(A_LoopField, delim)
 			
 			if ( Columns.Length() == 0 or Columns == )
 				continue ; Even a non-delimiter value returns something so return if somehow we have nothing.
@@ -96,7 +99,9 @@ Class MyDSVTool
 		; Processing
 		data := this.getData()
 		for rIndex, row in data
+        {
 			result .= this.NewLine row[column]
+        }
 		result := SubStr(result, StrLen(this.NewLine) + 1)
 		
 		; Return

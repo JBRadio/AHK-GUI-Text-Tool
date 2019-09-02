@@ -42,31 +42,29 @@ ProcessFunction(OutputVarFunctionName, OutputVarInputType){ ; Main processing fu
 ;~ return
 
 ButtonClear:
-	GuiControl,, EditInput,
-	GuiControl,, EditOutput,
-	;SetStatusMessageAndColor("Cleared all inputs.", "Green")
-	SB_SetText("Cleared all inputs.")
+	GuiControl,, EditInput,												; Sets input text box to nothing (clears it)
+	GuiControl,, EditOutput,											; Sets output text box to nothing (clears it)
+	SB_SetText("Cleared all input text boxes.")
 return
 
 ButtonCopy:
-	GuiControlGet, OutputVarOutput,,EditOutput,Edit
+	GuiControlGet, OutputVarOutput,,EditOutput,Edit						; Gets output text box content
 	OutputVarStrReplace := StrReplace(OutputVarOutput, "`n", "`r`n")	; The "Edit" controls only have `n so need to add `r`n on "Copy"
-	Clipboard := OutputVarStrReplace
+	Clipboard := OutputVarStrReplace									; Sets Windows Clipboard to updated output text box content
 	;SetStatusMessageAndColor("Copied output to Windows Clipboard.", "Green")
 	SB_SetText("Copied output to Windows Clipboard.")
 return
 
 ButtonMoveUp:
-	GuiControlGet, OutputVarOutput,,EditOutput,Edit
-	OutputVarStrReplace := StrReplace(OutputVarOutput, "`n", "`r`n")
-	GuiControl,, EditInput, %OutputVarStrReplace%
-	;SetStatusMessageAndColor("Copied output to input.", "Green")
+	GuiControlGet, OutputVarOutput,,EditOutput,Edit						; Gets output text box content
+	OutputVarStrReplace := StrReplace(OutputVarOutput, "`n", "`r`n")	; Replaces `n (LF) with `r`n (CRLF) in output content
+	GuiControl,, EditInput, %OutputVarStrReplace%						; Sets input text box with output content
+	GuiControl,, EditOutput,											; Sets output text box to nothing (clearing it)
 	SB_SetText("Copied output to input.")
 return
 
 ButtonPaste:
-	GuiControl,, EditInput, %Clipboard%
-	;SetStatusMessageAndColor("Pasted Windows Clipboard content to User Input.", "Green")
+	GuiControl,, EditInput, %Clipboard%									; Sets input text box content to Windows Clipboard content
 	SB_SetText("Pasted Windows Clipboard content to User Input.")
 return
 
@@ -78,7 +76,7 @@ ButtonProcess:
 	else if ( Current_Tab == "Programmer" )
 		Gui, ListView, MyListViewProg
 	else
-		MsgBox % "Current tab is: " Current_Tab
+		MsgBox % "Current tab is: " Current_Tab	; default when something a-miss..
 	
 	RowNumber := LV_GetNext(0,"F")
 	if (!RowNumber)
@@ -261,7 +259,8 @@ ListViewInit:
 	;
 	; Markdown (to HTML), "1+ Lines", "Convert Markdown (MD) to HTML" -- see Markdown_2_HTML.ahk by JasonDavis for code and GUI application (From Others folder)
 	;
-	LV_Add("", "Sort (Alpha Asc)", "1+ Lines", "Sort lines of text alphabetically ascendingly", "TextSortAlphabetically")
+	LV_Add("", "Sort (Regex Capture Group 1)", "2+ Lines", "Sorts lines by the value captured in group 1 of a RegEx", "TextSortRegexCaptureGroup1")
+    LV_Add("", "Sort (Alpha Asc)", "1+ Lines", "Sort lines of text alphabetically ascendingly", "TextSortAlphabetically")
 	LV_Add("", "Sort (Alpha Unique Asc)", "1+ Lines", "Sort unique lines of text alphabetically ascendingly", "TextSortAlphabeticallyUnique")
 	LV_Add("", "Sort (Alpha Unique Case Insensitive Asc)", "1+ Lines", "Sort unique lines of text alphabetically, ascendingly, and case sensitive", "TextSortAlphabeticallyUniqueCaseInsensitive")
 	LV_Add("", "Sort Line w/ Delimiter (Alpha Asc)", "1+ Lines", "Split line by delimiter and sort alphabetically, ascendingly", "TextSortAlphabeticallyWithDelimiter")

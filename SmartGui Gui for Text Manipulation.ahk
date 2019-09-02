@@ -18,19 +18,7 @@
 ;   JavaScript
 ;   PHP
 ;
-
-;#NoTrayIcon
-
-#SingleInstance Force
-
-#Include MyDSVTool.ahk		; Delimiter-Separated-Values Tool (CSV, TSV, etc.)
-#Include Text-to-Speech.ahk
-#Include JSON_Beautify.ahk
-;#Include jsonFormatter.ahk ; https://autohotkey.com/board/topic/94687-jsonformatter-json-pretty-print-using-javascript/
-
-global myDSVTool := New MyDSVTool
-
-
+;
 ; Ideas for GUI/Usage/User Feedback Improvement
 ;  - Remove "Done." as the default status text for functions. Allow functions to return "Done." or something else.
 ;  - ButtonUndo: Save up to the last 10 actions and undo one at a time.
@@ -62,55 +50,85 @@ global myDSVTool := New MyDSVTool
 ;   Lists,CSV / *SV
 ;    - Swap 1 CSV column position with another column
 ;
+;#NoTrayIcon
 
-Gui, Margin, 8, -10
+/*
+CHANGE LOG
+----------
+ 2019.08.30: ;Gui, Margin, 8, -10 - Commented out line so ListView/Tab would have perfect margins
+			Function: HelperExtractColumnDataForAnySV
+			 * Should work with any delimiter entered now
+			Function: HelperAskUserForDelim() - NEW
+			* When *SV function was used, `t or \t didn't resolve to a tab character, fixed now. - ExtractColumnDataForAnySV, SwapColumnForAnySV, FilterColumnDataForAnySV, SortDataByColumnForAnySV, SpacedColumnForAnySV		
+			
+ 2019.08.25: Added # directive (#NoEnv), SendMode, SetWorkingDir at the top
+             Moved MVC files to 'MVC' folder
+			 Moved 3rd party files to '3rd Party' folder
+*/
 
+#SingleInstance Force
+
+; #Warn						; Enable warnings to assist with detecting common errors.
+#NoEnv						; Recommended for performance and compatibility with future AutoHotkey releases.
+SendMode Input  			; Recommended for new scripts due to its superior speed and reliability.
+SetWorkingDir %A_ScriptDir%	; Ensures a consistent starting directory.
+
+; 3rd Party Dependencies
+#Include %A_ScriptDir%\3rd Party\Text-to-Speech.ahk
+#Include %A_ScriptDir%\3rd Party\JSON_FromObj.ahk
+#Include %A_ScriptDir%\3rd Party\JSON_Beautify.ahk
+#Include %A_ScriptDir%\3rd Party\FGP - FileGetProperties.ahk
+
+; My Library Dependencies
+#Include MyDSVTool.ahk		; Delimiter-Separated-Values Tool (CSV, TSV, etc.)
+global myDSVTool := New MyDSVTool
+
+; Main Program
+;Gui, Margin, 8, -10
 Gui, Add, Tab3, y+5 vTabVar, General|Programmer
 
 Gui, Tab, General,, Exact
-#Include Tab General VIEW.ahk
-Gui, Add, Button, Hidden Default, OK
+#Include %A_ScriptDir%\MVC\Tab General VIEW.ahk
+;Gui, Add, Button, Hidden Default, OK
 
 Gui, Tab, Programmer,, Exact
-#Include Tab Programmer VIEW.ahk
+#Include %A_ScriptDir%\MVC\Tab Programmer VIEW.ahk
 ;Gui, Add, Button, Hidden Default, OKProg
 
 Gui, Tab  ; i.e. subsequently-added controls will not belong to the tab control.
+Gui, Add, Button, Hidden Default, OK	; Allows for enter key on ListView to submit choice
 
-Gui, Margin
+;Gui, Margin	; Reset Margin
 
 ; Shared controls
 Gui, Add, Edit, vEditInput x17 y205 w330 h70
 Gui, Add, Edit, vEditOutput x17 y315 w330 h70 ReadOnly, Readonly processed results appear here. (Can be selected and copied)
-/*
-Gui, Add, Button, vGuiButtonClear x367 y170 w90 h30 , Clear	; Additional 5 for y
-Gui, Add, Button, vGuiButtonPaste x367 y205 w90 h30 , Paste
-Gui, Add, Button, vGuiButtonProcess x367 y245 w90 h30 , Process
-*/
-Gui, Add, Button, vGuiButtonClear x367 y205 w100 h30, Clear	; Additional 5 for y ; + 10 width
+Gui, Add, Button, vGuiButtonClear x367 y205 w100 h30, Clear		; Additional 5 for y ; + 10 width
 Gui, Add, Button, vGuiButtonPaste x367 y240 w100 h30, Paste
 Gui, Add, Button, vGuiButtonProcess x367 y275 w100 h30, Process
 Gui, Add, Button, vGuiButtonCopy x367 y315 w90 h30 , Copy
 Gui, Add, Button, vGuiButtonMoveUp x367 y355 w90 h30 , Move Up
-Gui, Add, Text, vGuiTextUserInput x17 y185 w80 h20, User Input ; Additional 10 for y
-Gui, Add, Text, vGuiTextOutput x17 y295 w80 h20, Ouput		 ; Additional 10 for y
+Gui, Add, Text, vGuiTextUserInput x17 y185 w80 h20, User Input 	; Additional 10 for y
+Gui, Add, Text, vGuiTextOutput x17 y295 w80 h20, Ouput		 	; Additional 10 for y
 
+; Status Bar
 Gui, Add, StatusBar,, Status text will appear here	; Usage of StatusBar: SB_SetText("There are " . RowCount . " rows selected.")
 
+; Define Windows dimensions for GUI
 hMaxSize := A_ScreenHeight
 wMaxSize := A_ScreenWidth / 2
 
-;Gui, +Resize +MinSize +MaxSize600x580 ; MinSize with no suffix to use the window's current size as the limit
-Gui, +Resize +MinSize +MaxSize%wMaxSize%x%hMaxSize% ; MinSize with no suffix to use the window's current size as the limit
-Gui, +MinSize +Resize ; MinSize with no suffix to use the window's current size as the limit
-Gui, Show, w480 h425, Text Manipulation for MEDITECH
-;Gui, Show, Hide w480 h425, Text Manipulation for MEDITECH
+Gui, +Resize +MinSize +MaxSize%wMaxSize%x%hMaxSize% 	; MinSize with no suffix to use the window's current size as the limit
+;Gui, +MinSize +Resize 									; MinSize with no suffix to use the window's current size as the limit
+Gui, Show, w480 h425, Text Manipulation	                ; Application window appears centered on load
+;Gui, Show, Hide w480 h425, Text Manipulation
 
 ; Force focus to first ListView initially
 ;~ GuiControl, Focus, MyListView
 ;~ LV_Modify(1, "Select")
 return
 
+; When GUI size changes:
 GuiSize:
 	if ( A_GuiHeight == 425 and A_GuiWidth == 480 )
 	{
@@ -160,12 +178,15 @@ GuiSize:
 	}
 return
 
+; When GUI closes
 GuiClose:
 ;ExitApp
 Gui, Hide
 return
 
 #IfWinActive ahk_class AutoHotkeyGUI ; Do not block Escape key usage for non-AHK GUI Applications
+
+; When user hits escape while AutoHotkey GUI is active
 ESC::
 ;ExitApp
 Gui, Hide
@@ -179,10 +200,6 @@ Enter::
 	if ( OutputVarFocusedVariable == "MyListView" )
 	{
 		Gui, ListView, MyListView
-		;~ selRow := LV_GetNext(0, "Focused")
-		;~ LV_GetText(OutputVarFunctionName, selRow, 4)
-		;~ LV_GetText(OutputVarInput, selRow, 2)
-		;~ ProcessFunction(OutputVarFunctionName, OutputVarInput)
 		EnterKeyPressedOnListView()
 	}
 	else if ( OutputVarFocusedVariable == "MyListViewProg" )
@@ -334,8 +351,8 @@ return
 Gui, Show
 return
 
-#Include Tab General CONTROLLER.ahk		; General Tab's Controller - button logic
-#Include Tab General MODEL.ahk 			; Includes all the functions called upon by the General Tab's Functions
+#Include %A_ScriptDir%\MVC\Tab General CONTROLLER.ahk		; General Tab's Controller - button logic
+#Include %A_ScriptDir%\MVC\Tab General MODEL.ahk 			; Includes all the functions called upon by the General Tab's Functions
 
-#Include Tab Programmer CONTROLLER.ahk	; Programmer Tab's Controller - button logic, listview initiator
-#Include Tab Programmer MODEL.ahk		; Includes all the functions called upon by the Programmer Tab's Functions (unless shared with an existing function)
+#Include %A_ScriptDir%\MVC\Tab Programmer CONTROLLER.ahk	; Programmer Tab's Controller - button logic, listview initiator
+#Include %A_ScriptDir%\MVC\Tab Programmer MODEL.ahk		; Includes all the functions called upon by the Programmer Tab's Functions (unless shared with an existing function)

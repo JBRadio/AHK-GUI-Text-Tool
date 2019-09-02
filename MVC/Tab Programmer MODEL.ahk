@@ -524,3 +524,78 @@ HtmlTableToCSV(UserInput){
 	return vResults
 }
 ; -----------------------------------------------------------------------------------------------------------
+
+; -----------------------------------------------------------------------------------------------------------
+FileGetProperties(){
+	SetBatchLines, -1							; Originally 10ms - SetBatchLines, 10ms
+	FileSelectFile, FilePath					; Select a file to use for this example.
+	
+	if (FilePath = "") {
+		SB_SetText("The user didn't select a file.")
+		return
+	}
+
+	/*
+	PropName := FGP_Name(0)						; Gets a property name based on the property number.
+	PropNum  := FGP_Num("Size")					; Gets a property number based on the property name.
+	PropVal1 := FGP_Value(FilePath, PropName)	; Gets a file property value by name.
+	PropVal2 := FGP_Value(FilePath, PropNum)	; Gets a file property value by number.
+	PropList := FGP_List(FilePath)				; Gets all of a file's non-blank properties.
+
+	MsgBox, % FilePath
+	. "`n" PropName ":`t" PropVal1			; Display the results.
+	. "`n" PropNum ":`t" PropVal2
+	. "`n`nList:`n" PropList.CSV
+	*/
+
+	PropName := FGP_Name(0)						; Gets a property name based on the property number.
+	PropVal1 := FGP_Value(FilePath, PropName)	; Gets a file property value by name.
+	PropList := FGP_List(FilePath)				; Gets all of a file's non-blank properties.
+
+	vResult := PropName ": " PropVal1	; "Name: " {Name of Selected File}
+	. "`nPath: " FilePath					; "Path: " {Path of Selected File}
+	. "`n`nProperties:`n" PropList.CSV
+
+	SetBatchLines, 10ms
+	return vResult
+}
+; -----------------------------------------------------------------------------------------------------------
+
+; -----------------------------------------------------------------------------------------------------------
+
+;GUIName := "MyGui"
+/*
+ShowListOfWindowsExtendedProperties(){
+	
+	;global GUIName
+	
+	SetBatchLines, -1
+	Gui, MyGui: New
+	Gui, MyGui: Margin, 20, 20
+	Gui, MyGui: Add, ListView, w600 r20 Grid vLV +E0x010000, #|Index|Name
+	
+	Details := GetDetails()
+	For Index, Name In Details
+	   LV_Add("", A_Index, Index, Name)
+	Loop, % LV_GetCount("Column")
+	   LV_ModifyCol(A_Index, "AutoHdr")
+	Gui, %GUIName%:Show, , Extended Properties
+	
+	SetBatchLines, 10ms
+	SB_SetText("Launched Gui")
+	Return
+}
+
+GetDetails() {
+   Static MaxGap := 11 ; on WIn 8.1 MU all gaps between named details are less than 4
+   Shell := ComObjCreate("Shell.Application")
+   Folder := Shell.NameSpace(0)
+   Details := [], Gap := 0
+   While (Gap < MaxGap)
+	  If (Name := Folder.GetDetailsOf(0, A_Index - 1))
+		 Details[A_Index - 1] := Name, Gap := 0
+	  Else
+		 Gap++
+   Return Details
+}
+*/

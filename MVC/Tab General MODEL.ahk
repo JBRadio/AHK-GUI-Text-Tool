@@ -184,29 +184,7 @@ ConvertUnderline(UserInput)
 	return vText
 }
 
-ExtractColumnDataForCSV(UserInput)
-{
-	Text := UserInput
-	delim := ","
-	Text := HelperExtractColumnDataForAnySV(Text, delim)
-	
-	;SetStatusMessageAndColor("Extracted 1 Column's data (CSV).", "Green")
-	SB_SetText("Extracted 1 Column's data (CSV).")
-	return Text
-}
-
-ExtractColumnDataForTSV(UserInput)
-{
-	Text := UserInput
-	delim := "`t"
-	Text := HelperExtractColumnDataForAnySV(Text, delim)
-	
-	;SetStatusMessageAndColor("Extracted 1 Column's data (TSV).", "Green")
-	SB_SetText("Extracted 1 Column's data (TSV).")
-	return Text
-}
-
-ExtractColumnDataForAnySV(UserInput)
+HelperAskUserForDelim()
 {
 	Prompt := "What character separates the data?"
 	ErrorLevel =
@@ -219,19 +197,69 @@ ExtractColumnDataForAnySV(UserInput)
 	
 	if ( ErrorLevel )
 		return ; User canceled
+	else
+		return OutputVar
+}
+
+ExtractColumnDataForCSV(UserInput)
+{
+	vText := UserInput
+	vDelim := ","
+	vText := HelperExtractColumnDataForAnySV(vText, vDelim)
 	
-	Text := UserInput
+	SB_SetText("Extracted 1 Column's data (CSV).")
+	return vText
+}
+
+ExtractColumnDataForTSV(UserInput)
+{
+	vText := UserInput
+	vDelim := "`t"
+	vText := HelperExtractColumnDataForAnySV(vText, vDelim)
+	
+	SB_SetText("Extracted 1 Column's data (TSV).")
+	return vText
+}
+
+ExtractColumnDataForAnySV(UserInput)
+{
+	/*
+    Prompt := "What character separates the data?"
+	ErrorLevel =
+	
+	InputBox, OutputVar, Enter Data for ..., %Prompt%, %HIDE%, %Width%, %Height%, %X%, %Y%, , %Timeout%, %Dft%
+	while (strlen(OutputVar) < 1 and not ErrorLevel)
+	{
+		InputBox, OutputVar, Enter Data for ..., %Prompt%, %HIDE%, %Width%, %Height%, %X%, %Y%, , %Timeout%, %Dft%
+	}
+	
+	if ( ErrorLevel )
+		return ; User canceled
+	
 	delim := OutputVar
-	Text := HelperExtractColumnDataForAnySV(Text, delim)
+    */
+    
+    vDelim := HelperAskUserForDelim()
 	
-	;SetStatusMessageAndColor("Extracted 1 Column's data (*SV).", "Green")
+	if ( StrLen(vDelim) == 0 )
+	{
+		SB_SetText("Delimiter is not defined.")
+		return ; No delimiter found/given.
+	}
+	
+	vText := UserInput
+	vText := HelperExtractColumnDataForAnySV(vText, vDelim)
+	
 	SB_SetText("Extracted 1 Column's data (*SV).")
-	return Text
+	return vText
 }
 
 HelperGetSVDataIntoRowsArray(data, delim)
 {
 	arrRows := Object()
+    
+    if ( delim == "\t" or delim == "`t" )
+		delim := "`t"
 	
 	; Below loop/parse works for all tested scenarios: `r`n, `n, and a single line of text
 	Loop, Parse, data, `n, `r
@@ -249,8 +277,17 @@ HelperGetSVDataIntoRowsArray(data, delim)
 
 HelperExtractColumnDataForAnySV(data, delim)
 {
-	;arrRows := HelperGetSVDataIntoRowsArray(data, delim)
-	myDSVTool.loadText(data)
+	if (!delim)
+		delim := HelperAskUserForDelim()
+	
+	if ( StrLen(delim) == 0 )
+	{
+		SB_SetText("Delimiter is not defined.")
+		return ; No delimiter found/given.
+	}
+    
+    ;arrRows := HelperGetSVDataIntoRowsArray(data, delim)
+	myDSVTool.loadText(data, delim)
 	arrRows := myDSVTool.getData()
 
 	; Ask user to pick a column to extract
@@ -268,17 +305,6 @@ HelperExtractColumnDataForAnySV(data, delim)
 	{
 		InputBox, OutputVar, Enter Data for ..., %Prompt%, %HIDE%, %Width%, %Height%, %X%, %Y%, , %Timeout%, %Dft%
 	}
-
-	/*
-	NewLine := "`r`n"
-	retValue := 
-	
-	for indexRow, elementRow in arrRows
-		retValue .= NewLine elementRow[OutputVar]
-
-	retValue := SubStr(retValue, StrLen(NewLine) + 1)
-	return retValue
-	*/
 	
 	myDSVTool.extractColumnData(OutputVar)
 	return myDSVTool.getResult()
@@ -312,7 +338,8 @@ SwapColumnForTSV(UserInput)
 
 SwapColumnForAnySV(UserInput)
 {
-	Prompt := "What character separates the data?"
+	/*
+    Prompt := "What character separates the data?"
 	ErrorLevel =
 	
 	InputBox, OutputVar, Enter Data for ..., %Prompt%, %HIDE%, %Width%, %Height%, %X%, %Y%, , %Timeout%, %Dft%
@@ -324,8 +351,21 @@ SwapColumnForAnySV(UserInput)
 	if ( ErrorLevel )
 		return ; User canceled
 	
-	vText := UserInput
 	vDelim := OutputVar
+    */
+    
+    vDelim := HelperAskUserForDelim()
+	
+	if ( StrLen(vDelim) == 0 )
+	{
+		SB_SetText("Delimiter is not defined.")
+		return ; No delimiter found/given.
+	}
+	
+	if ( vDelim == "\t" or vDelim == "`t" )
+		vDelim := "`t"
+        
+    vText := UserInput
 	vText := HelperSwapColumnDataForAnySV(vText, vDelim)
 	
 	;SetStatusMessageAndColor("Swap 1 Column's data (*SV).", "Green")
@@ -420,7 +460,8 @@ FilterColumnDataForTSV(UserInput)
 
 FilterColumnDataForAnySV(UserInput)
 {
-	Prompt := "What character separates the data?"
+	/*
+    Prompt := "What character separates the data?"
 	ErrorLevel =
 	
 	InputBox, OutputVar, Enter Data for ..., %Prompt%, %HIDE%, %Width%, %Height%, %X%, %Y%, , %Timeout%, %Dft%
@@ -432,13 +473,26 @@ FilterColumnDataForAnySV(UserInput)
 	if ( ErrorLevel )
 		return ; User canceled
 	
-	Text := UserInput
 	delim := OutputVar
-	Text := HelperFilterColumnDataForAnySV(Text, delim)
+    */
+    
+    vDelim := HelperAskUserForDelim()
+	
+	if ( StrLen(vDelim) == 0 )
+	{
+		SB_SetText("Delimiter is not defined.")
+		return ; No delimiter found/given.
+	}
+	
+	if ( vDelim == "\t" or vDelim == "`t" )
+		vDelim := "`t"
+	
+	vText := UserInput
+	vText := HelperFilterColumnDataForAnySV(vText, vDelim)
 	
 	;SetStatusMessageAndColor("Filtered 1 Column's data (*SV).", "Green")
 	SB_SetText("Filtered 1 Column's data (*SV).")
-	return Text
+	return vText
 }
 
 HelperFilterColumnDataForAnySV(data, delim)
@@ -451,10 +505,28 @@ HelperFilterColumnDataForAnySV(data, delim)
 	if ( intColumns < 1 )
 		return
 
-	SampleRow := Join(arrRows[1], delim)
-	Prompt := "Filter Column: Pick a number between 1 and " . intColumns . "`r`n`r`nHere is a Sample row: `r`n" . SampleRow
+	vSampleRow := 
+	Loop % arrRows[1].Length()
+		vSampleRow .= "`n" A_Index ": " arrRows[1][A_Index]
+	
+	vSampleRow := SubStr(vSampleRow, StrLen("`n") + 1)
+    
+    SampleRow := Join(arrRows[1], delim)
+	;Prompt := "Filter Column: Pick a number between 1 and " . intColumns . "`r`n`r`nHere is a Sample row: `r`n" . SampleRow
+	Prompt := "Filter Column: Pick a number between 1 and " . intColumns . "`n`nHere is a Sample row: `n" . vSampleRow
+	;Prompt := vSampleRow
 
-	ErrorLevel =
+	/*
+	vHeight := Height
+	;Height := (intColumns * 25) + 100 + 50 ; Each line = 25, 4 lines before sample row; +50 for the textfield and buttons
+	Height := ((intColumns * 25) + 150) < 189 ? 189 : (intColumns * 25) + 150
+	*/
+	
+	; Count how many lines, then height = 125 + (17 * Lines)
+	StringReplace, OutputVar, Prompt, `n,, UseErrorLevel
+	Height := 125 + (17 * (ErrorLevel))
+    
+    ErrorLevel =
 	InputBox, OutputVar, Enter Data for ..., %Prompt%, %HIDE%, %Width%, %Height%, %X%, %Y%, , %Timeout%, %Dft%
 	while (ErrorLevel == 1 or strlen(OutputVar) < 1 or OutputVar = " " or OutputVar > intColumns or OutputVar < 1)
 	{
@@ -533,7 +605,7 @@ SortDataByColumnTSV(UserInput)
 
 SortDataByColumnForAnySV(UserInput)
 {
-	
+	/*
 	Prompt := "What character separates the data?"
 	ErrorLevel =
 	
@@ -546,13 +618,26 @@ SortDataByColumnForAnySV(UserInput)
 	if ( ErrorLevel )
 		return ; User canceled
 	
-	Text := UserInput
 	delim := OutputVar
-	Text := HelperSortDataByColumnForAnySV(Text, delim)
+    */
+    
+    vDelim := HelperAskUserForDelim()
+	
+	if ( StrLen(vDelim) == 0 )
+	{
+		SB_SetText("Delimiter is not defined.")
+		return ; No delimiter found/given.
+	}
+	
+	if ( vDelim == "\t" or vDelim == "`t" )
+		vDelim := "`t"
+	
+	vText := UserInput
+	vText := HelperSortDataByColumnForAnySV(vText, vDelim)
 	
 	;SetStatusMessageAndColor("Filtered 1 Column's data (*SV).", "Green")
 	SB_SetText("Sorted Column data (*SV).")
-	return Text
+	return vText
 }
 
 ; Sort CSV by Column Number chosen
@@ -712,9 +797,21 @@ HelperPrintSpacedColumns(arrData, colMaxWidth, hasHeader)
 	return SubStr(@, StrLen(NewLine)+1)
 }
 
+HelperSpacedColumnForAnySV(vText, vDelim, hasHeader := false)
+{
+	arrData := HelperGetSVDataIntoRowsArray(vText, vDelim)
+	colMaxWidth := HelperFindColumnMaxWidth(arrData)
+	
+	if ( hasHeader )
+		return HelperPrintSpacedColumns(arrData, colMaxWidth, true)
+	else
+		return HelperPrintSpacedColumns(arrData, colMaxWidth, false)
+}
+
 SpacedColumnForAnySV(UserInput)
 {
-	Prompt := "What character separates the data?"
+	/*
+    Prompt := "What character separates the data?"
 	ErrorLevel =
 	
 	InputBox, OutputVar, Enter Data for ..., %Prompt%, %HIDE%, %Width%, %Height%, %X%, %Y%, , %Timeout%, %Dft%
@@ -725,23 +822,40 @@ SpacedColumnForAnySV(UserInput)
 	
 	if ( ErrorLevel )
 		return ; User canceled
+        
+    vDelim := OutputVar
+	*/
+    
+    vDelim := HelperAskUserForDelim()
 	
+	if ( StrLen(vDelim) == 0 )
+	{
+		SB_SetText("Delimiter is not defined.")
+		return ; No delimiter found/given.
+	}
+	
+	if ( vDelim == "\t" or vDelim == "`t" )
+		vDelim := "`t"
+    
 	MsgBox, 4, Data Table, First row header row? (Yes or No)
 	IfMsgBox Yes
 		hasHeader := true
 	
 	vText := UserInput
-	vDelim := OutputVar
+    
+    /*
 	arrData := HelperGetSVDataIntoRowsArray(vText, vDelim)
 	colMaxWidth := HelperFindColumnMaxWidth(arrData)
 	
-	;SetStatusMessageAndColor("Done.", "Green")
 	SB_SetText("Done.")
 	
 	if ( hasHeader )
 		return HelperPrintSpacedColumns(arrData, colMaxWidth, true)
 	else
 		return HelperPrintSpacedColumns(arrData, colMaxWidth, false)
+    */
+    
+    return HelperSpacedColumnForAnySV(vText, vDelim, hasHeader)
 }
 
 TextDuplicateXTimes(UserInput){
@@ -2546,6 +2660,86 @@ HelperTextPrefixSuffixEachLine(data, Prefix, Suffix)
 	return retValue
 }
 
+TextSortRegexCaptureGroup1(UserInput) {
+	
+	Prompt = "Enter character(s) to find/replace with new line"
+	InputBox, OutputVar, Enter Data for ..., %Prompt%, %HIDE%, %Width%, %Height%, %X%, %Y%, , %Timeout%, %Dft%
+	
+	if ErrorLevel
+		return ; Cancel was pressed
+	
+	if ( StrLen(Trim(OutputVar)) == 0 ) {
+		SB_SetText("User hit enter with nothing in the box.")
+		return ; User hit enter with nothing in the box
+	}
+	
+	if ( RegExMatch(OutputVar, "\(.+\)") < 1 ) {
+		SB_SetText("No capture groups found.")
+		return ; No capture groups found
+	}
+		
+	vText := UserInput
+	vRegExSearch := OutputVar
+	
+	SB_SetText("Text sorted by capture group 1 of Regular Expression")
+	return HelperTextSortRegexCaptureGroup1(vText, vRegExSearch)
+}
+
+HelperTextSortRegexCaptureGroup1(vText, vRegExSearch) {
+	; Sort Lines by RegEx Capture Group #1
+	; - Maybe allow user to specify capture group for comparison
+
+	;vRegExSearch := "\{[a-zA-Z0-9\-]+\|(\d+)\}"
+	arrLines := StrSplit(vText, "`n")
+
+	Loop % arrLines.MaxIndex()
+	{
+		Outer := A_Index
+		InnerLoopCount := arrLines.MaxIndex() - Outer
+		Inner := Outer + 1
+		;MsgBox % "InnerLoopCount: " InnerLoopCount
+		
+		Loop % InnerLoopCount
+		{
+			; MsgBox % "Outer: " Outer ", Inner: " Inner
+			
+			
+			FoundPos := RegExMatch(arrLines[Outer], vRegExSearch, First)
+			
+			if ErrorLevel
+				continue ; There was a RegEx processing error
+			
+			if FoundPos == 0
+				First1 := "ZZZ"
+			
+			FoundPos := RegExMatch(arrLines[Inner], vRegExSearch, Second)
+			
+			if ErrorLevel {
+				continue ; There was a RegEx processing error
+			}
+			
+			if FoundPos == 0
+				Second1 := "ZZZ" ; Sort to the bottom of the list if the pattern couldn't be found
+			
+			
+			; MsgBox % "Outer Match: " First1 ", Inner Match: " Second1
+			
+			if ( First1 > Second1 )
+			{
+				temp := arrLines[Inner]
+				arrLines[Inner] := arrLines[Outer]
+				arrLines[Outer] := temp
+				;MsgBox % "Outer: " arrData[Outer][vColumnSort] ", Inner: " arrData[Inner][vColumnSort]
+			}
+			
+			Inner += 1
+		}
+	}
+
+	vResult := Join(arrLines, "`n")
+	;MsgBox % vResult
+	return vResult
+}
 
 TextSortAlphabetically(UserInput) {
 	; Sort selected text and replace it
