@@ -55,6 +55,19 @@
 /*
 CHANGE LOG
 ----------
+ 2019.09.08:
+			GUI/ / Application
+			 * Changed font to fixed-width font (Consolas) for input/output text boxes
+			 * Changed font to bold for Text labels (default font is system, or MS Shell Dlg for me)
+			 * Changed Win+4 toggle logic to no longer use a state variable / check for active window title and class instead
+			 * Removed minimized box to prevent invalid GUI placement on restore after being minimized when Windows Taskbar is vertical; ESC, Close button, and Win+4 hides the GUI
+			 
+ 2019.09.06:
+			GUI / Application
+			 * Win+4 now toggles the GUI show/hide. Escape and GuiClose only hides when the GUI is on and then toggles state.
+			Function RemoveBlankLines
+			 * Changed the condition to break out of loop when removing all double CRLF and double LF
+             
  2019.08.30: ;Gui, Margin, 8, -10 - Commented out line so ListView/Tab would have perfect margins
 			Function: HelperExtractColumnDataForAnySV
 			 * Should work with any delimiter entered now
@@ -84,6 +97,7 @@ SetWorkingDir %A_ScriptDir%	; Ensures a consistent starting directory.
 global myDSVTool := New MyDSVTool
 
 ; Main Program
+; Gui, New	; Breaks Gui hide/show ; This is a reminder
 ;Gui, Margin, 8, -10
 Gui, Add, Tab3, y+5 vTabVar, General|Programmer
 
@@ -101,15 +115,21 @@ Gui, Add, Button, Hidden Default, OK	; Allows for enter key on ListView to submi
 ;Gui, Margin	; Reset Margin
 
 ; Shared controls
+Gui, Font,,Consolas ; Effort to use fixed-width font for better visual effect (especially in Output)
 Gui, Add, Edit, vEditInput x17 y205 w330 h70
 Gui, Add, Edit, vEditOutput x17 y315 w330 h70 ReadOnly, Readonly processed results appear here. (Can be selected and copied)
+
+Gui, Font, bold
+Gui, Add, Text, vGuiTextUserInput x17 y185 w80 h20, User Input 	; Additional 10 for y
+Gui, Add, Text, vGuiTextOutput x17 y295 w80 h20, Ouput		 	; Additional 10 for y
+
+Gui, Font, norm ; remove bold
+Gui, Font,,MS Shell Dlg
 Gui, Add, Button, vGuiButtonClear x367 y205 w100 h30, Clear		; Additional 5 for y ; + 10 width
 Gui, Add, Button, vGuiButtonPaste x367 y240 w100 h30, Paste
 Gui, Add, Button, vGuiButtonProcess x367 y275 w100 h30, Process
 Gui, Add, Button, vGuiButtonCopy x367 y315 w90 h30 , Copy
 Gui, Add, Button, vGuiButtonMoveUp x367 y355 w90 h30 , Move Up
-Gui, Add, Text, vGuiTextUserInput x17 y185 w80 h20, User Input 	; Additional 10 for y
-Gui, Add, Text, vGuiTextOutput x17 y295 w80 h20, Ouput		 	; Additional 10 for y
 
 ; Status Bar
 Gui, Add, StatusBar,, Status text will appear here	; Usage of StatusBar: SB_SetText("There are " . RowCount . " rows selected.")
@@ -118,14 +138,15 @@ Gui, Add, StatusBar,, Status text will appear here	; Usage of StatusBar: SB_SetT
 hMaxSize := A_ScreenHeight
 wMaxSize := A_ScreenWidth / 2
 
-Gui, +Resize +MinSize +MaxSize%wMaxSize%x%hMaxSize% 	; MinSize with no suffix to use the window's current size as the limit
+Gui, +Resize +MinSize +MaxSize%wMaxSize%x%hMaxSize% -MinimizeBox	; MinSize with no suffix to use the window's current size as the limit
 ;Gui, +MinSize +Resize 									; MinSize with no suffix to use the window's current size as the limit
-Gui, Show, w480 h425, Text Manipulation	                ; Application window appears centered on load
-;Gui, Show, Hide w480 h425, Text Manipulation
+Gui, Show, w480 h425,Text Manipulation	                ; Application window appears centered on load
+;Gui, Show, Hide w480 h425,Text Manipulation
 
 ; Force focus to first ListView initially
 ;~ GuiControl, Focus, MyListView
 ;~ LV_Modify(1, "Select")
+
 return
 
 ; When GUI size changes:
@@ -178,23 +199,40 @@ GuiSize:
 	}
 return
 
+#4::
+	; If GUI is showing but not active - Activate it / Show it
+	; If GUI is showing and active - Hide it
+	; If GUI is not showing - Show it
+	
+	WinGetTitle, vTitle, A
+	WinGetClass, vClass, A
+	
+	if ( (InStr(vTitle, "Text Manipulation") != 1) or (vClass != "AutoHotkeyGUI") )
+	{
+		; Our window name starts with "Text Manipulation" and the active window doesn't start off the same, show GUI
+		; If the active window is not class AutoHotkeyGUI, we know we aren't the active window
+		Gui, Show ; Activate - whether it's under another window or toggled off
+		
+	} else {
+		Gui, Hide
+	}
+return
+
 ; When GUI closes
 GuiClose:
-;ExitApp
-Gui, Hide
+    Gui, Hide
 return
 
 #IfWinActive ahk_class AutoHotkeyGUI ; Do not block Escape key usage for non-AHK GUI Applications
 
 ; When user hits escape while AutoHotkey GUI is active
 ESC::
-;ExitApp
-Gui, Hide
+    Gui, Hide
 return
 
 ; Workaround to execute code when pressing enter in ListView, when there are multiple ListView and multiple Tabs
 ; https://autohotkey.com/board/topic/55167-using-enter-with-multiple-listviews-in-one-script/
-#IfWinActive, Text Manipulation for MEDITECH
+#IfWinActive, Text Manipulation
 Enter::
 	GuiControlGet, OutputVarFocusedVariable, FocusV
 	if ( OutputVarFocusedVariable == "MyListView" )
@@ -347,9 +385,6 @@ return
 return
 
 #IfWinActive ; Restore hotkeys to work from any environment
-#4::
-Gui, Show
-return
 
 #Include %A_ScriptDir%\MVC\Tab General CONTROLLER.ahk		; General Tab's Controller - button logic
 #Include %A_ScriptDir%\MVC\Tab General MODEL.ahk 			; Includes all the functions called upon by the General Tab's Functions

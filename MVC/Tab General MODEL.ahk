@@ -1919,18 +1919,32 @@ TextReplaceSpacesDash(UserInput) {
 
 RemoveBlankLines(UserInput)
 {	
-	Text := UserInput
+	vText := UserInput
+    
+    ; Reduce double CRLF (`r`n`r`n)
 	Loop
 	{
-		;StringReplace, Clipboard, Clipboard, `r`n`r`n, `r`n, UseErrorLevel
-		StringReplace, Text, Text, `r`n`r`n, `r`n, UseErrorLevel
-		If ErrorLevel = 0  ; No more replacements needed.
+        ; When the last parameter is UseErrorLevel, ErrorLevel is given the number occurrences replaced (0 if none).
+		; Otherwise, ErrorLevel is set to 1 if SearchText is not found within InputVar, or 0 if it is found.
+		;StringReplace, vText, vText, `r`n`r`n, `r`n, UseErrorLevel
+		;if (ErrorLevel = 0)  ; No more replacements needed.
+		;	break
+		
+		StringReplace, vText, vText, `r`n`r`n, `r`n, All
+		if (ErrorLevel = 1)
 			break
 	}
 	
-	;SetStatusMessageAndColor("Removed blank lines.", "Green")
+    ; Reduce double LF (`n`n)
+	Loop
+	{
+		StringReplace, vText, vText, `n`n, `n, All
+		if (ErrorLevel = 1)
+			break
+	}
+    
 	SB_SetText("Removed blank lines.")
-	return Text
+	return vText
 }
 
 RemoveDuplicateLines(UserInput)
