@@ -1,21 +1,18 @@
 ﻿TextAnalysisCount(UserInput) {
 	; Mango.ahk
 	
-	Text := UserInput
-	;MsgBox % "UserInput: " Text
+	vText := UserInput
 	
-	len := StrLen(Text)
-	;MsgBox % "len: " len
-	
+	len := StrLen(vText)
 	Spaces:=""
 	newline:=""
 	chars:=""
 	Tabs:=""
 	
-	Loop, Parse, Text, `n, `r
+	Loop, Parse, vText, `n, `r
 		newline++
 	
-	Loop, Parse, Text
+	Loop, Parse, vText
 	{
 		If A_loopField=%A_Space%
 			Spaces++
@@ -30,9 +27,8 @@
 	If (Spaces=="")
 		Spaces:=0
 
-	chars:= len-Spaces-tabs
+	chars:= len-Spaces-tabs	
 	
-	;SetStatusMessageAndColor("Analysis complete.", "Green")
 	SB_SetText("Analysis complete.")
 	return "Length: " . len . "`nSpaces: " . spaces . "`nTabs: " . Tabs . "`nCharacters: " . chars . "`nLines: " . newline
 	
@@ -40,13 +36,12 @@
 
 ClipboardAppend(UserInput)
 {
-	; TESTED?
 	; Append user input text to clipboard (after/append)
 	; Does not add a new line before or after appeneded data
 	
 	; Additional Considerations: 
 	;  - Ask user to supply a character to fit between existing clipboard data and newly appended data
-	;SetStatusMessageAndColor("Clipboard + Appeneded data in Output.", "Green")
+	
 	SB_SetText("Clipboard + Appeneded data in Output.")
 	return Clipboard . UserInput
 }
@@ -59,32 +54,31 @@ ClipboardPrepend(UserInput)
 	
 	; Additional Considerations: 
 	;  - Ask user to supply a character to fit between existing clipboard data and newly prepended data
-	;SetStatusMessageAndColor("Prepended data + Clipboard to Output.", "Green")
+	
 	SB_SetText("Prepended data + Clipboard to Output.")
 	return UserInput . Clipboard
 }
+
 ClipboardAppendAsNewLine(UserInput)
 {
-	; TESTED?
 	; Append user input text to clipboard (after/append)
 	; Does not add a new line before or after appeneded data
 	
 	; Additional Considerations: 
 	;  - Ask user to supply a character to fit between existing clipboard data and newly appended data
-	;SetStatusMessageAndColor("Clipboard + Appeneded data + New Line in Output.", "Green")
+	
 	SB_SetText("Clipboard + Appeneded data + New Line in Output.")
 	return Clipboard . "`n" . UserInput
 }
 
 ClipboardPrependAsNewLine(UserInput)
 {
-	; TESTED?
 	; Append user input text to clipboard (after/append)
 	; Does not add a new line before or after appeneded data
 	
 	; Additional Considerations: 
 	;  - Ask user to supply a character to fit between existing clipboard data and newly prepended data
-	;SetStatusMessageAndColor("Prepended data + New Line + Clipboard to Output.", "Green")
+	
 	SB_SetText("Prepended data + New Line + Clipboard to Output.")
 	return UserInput . "`n" . Clipboard
 }
@@ -92,8 +86,9 @@ ClipboardPrependAsNewLine(UserInput)
 ConvertUppercase(UserInput)
 {
 	; Converts all text to uppercase text
+	
 	StringUpper, OutputVarStringUpper, UserInput
-	;SetStatusMessageAndColor("Converted input to Uppercase characters.", "Green")
+	
 	SB_SetText("Converted input to Uppercase characters.")
 	return OutputVarStringUpper
 }
@@ -101,8 +96,9 @@ ConvertUppercase(UserInput)
 ConvertLowercase(UserInput)
 {
 	; Converts all text to lowercase text
+	
 	StringLower, OutputVarStringLower, UserInput
-	;SetStatusMessageAndColor("Converted input to Lowercase characters.", "Green")
+	
 	SB_SetText("Converted input to Lowercase characters.")
 	return OutputVarStringLower
 }
@@ -110,8 +106,9 @@ ConvertLowercase(UserInput)
 ConvertTitleCase(UserInput)
 {
 	; Converts all text/sentences to title case
+	
 	StringUpper, OutputVarStringUpper, UserInput, T	; "T" for Title Case
-	;SetStatusMessageAndColor("Converted input to Title case.", "Green")
+	
 	SB_SetText("Converted input to Title case.")
 	return OutputVarStringUpper
 }
@@ -119,9 +116,10 @@ ConvertTitleCase(UserInput)
 ConvertSentenceCase(UserInput)
 {
 	; SENTENCE CASE - quick brown fox. went home. = Quick brown fox. Went home.
+	
 	vText := UserInput
 	vText := RegExReplace(vText, "([.?\s!]\s\w)|^(\.\s\b\w)|^(.)", "$U0")
-	;SetStatusMessageAndColor("Converted input to Sentence case.", "Green")
+	
 	SB_SetText("Converted input to Sentence case.")
 	return vText
 }
@@ -129,12 +127,12 @@ ConvertSentenceCase(UserInput)
 ConvertInvertCase(UserInput) {
 	; Thanks JDN ; Mango.ahk
 	
-	Text := UserInput
+	vText := UserInput
 	Lab_Invert_Char_Out:= ""
-	;Loop % Strlen(Clipboard) { ;%
-	Loop % Strlen(Text) {
+
+	Loop % Strlen(vText) {
 		;Lab_Invert_Char:= Substr(Clipboard, A_Index, 1)
-		Lab_Invert_Char:= Substr(Text, A_Index, 1)
+		Lab_Invert_Char:= Substr(vText, A_Index, 1)
 		If Lab_Invert_Char is Upper
 			Lab_Invert_Char_Out:= Lab_Invert_Char_Out Chr(Asc(Lab_Invert_Char) + 32)
 		Else If Lab_Invert_Char is Lower
@@ -142,20 +140,22 @@ ConvertInvertCase(UserInput) {
 		Else
 			Lab_Invert_Char_Out:= Lab_Invert_Char_Out Lab_Invert_Char
 	}
-	;Clipboard:=Lab_Invert_Char_Out
-	Text:=Lab_Invert_Char_Out
-	;SetStatusMessageAndColor("Converted input to inverted case.", "Green")
+	
+	vText:=Lab_Invert_Char_Out
+	
 	SB_SetText("Converted input to inverted case.")
-	return Text
+	return vText
 }
 
 ConvertCarriageReturnLineFeed(UserInput)
 {
 	; Turn `r to `r`n, in order to allow to work with Notepad and other Windows programs
-	Text := UserInput
-	Text := RegExReplace(Text, "`r", "`r`n")
+	
+	vText := UserInput
+	vText := RegExReplace(vText, "`r", "`r`n")
+	
 	SB_SetText("Replaced carriage returns (\r) with carriage return line feeds (\r\n or CRLF)")
-	return Text
+	return vText
 }
 
 ConvertStrikethrough(UserInput)
@@ -163,10 +163,11 @@ ConvertStrikethrough(UserInput)
 	; Strikeout with Unicode('\u0336') - borrowed from Text Tools (https://chrome.google.com/webstore/detail/text-tools/mpcpnbklkemjinipimjcbgjijefholkd)
 	vText := UserInput
 	vSplit := StrSplit(vText, "")
+	
 	for k,v in vSplit
 		vSplit[k] := v . "̶"
 	vText := Join(vSplit, "")
-	;MsgBox % vText
+
 	SB_SetText("Converted text to have a strikethrough property")
 	return vText
 }
@@ -174,12 +175,14 @@ ConvertStrikethrough(UserInput)
 ConvertUnderline(UserInput)
 {
 	; Underscore with Unicode ('\u0332') - borrowed from TextTools (https://chrome.google.com/webstore/detail/text-tools/mpcpnbklkemjinipimjcbgjijefholkd)
+	
 	vText := UserInput
 	vSplit := StrSplit(vText, "")
+	
 	for k,v in vSplit
 		vSplit[k] := v . "̲"
 	vText := Join(vSplit, "")
-	;MsgBox % vText
+
 	SB_SetText("Converted text to have a underline property")
 	return vText
 }
@@ -187,6 +190,7 @@ ConvertUnderline(UserInput)
 HelperAskUserForDelim()
 {
 	Prompt := "What character separates the data?"
+	Height := HelperDynamicallyFindHeightForInputBox(Prompt) ; (vPromptText)
 	ErrorLevel =
 	
 	InputBox, OutputVar, Enter Data for ..., %Prompt%, %HIDE%, %Width%, %Height%, %X%, %Y%, , %Timeout%, %Dft%
@@ -206,7 +210,7 @@ ExtractColumnDataForCSV(UserInput)
 	vText := UserInput
 	vDelim := ","
 	vText := HelperExtractColumnDataForAnySV(vText, vDelim)
-	
+
 	SB_SetText("Extracted 1 Column's data (CSV).")
 	return vText
 }
@@ -223,23 +227,8 @@ ExtractColumnDataForTSV(UserInput)
 
 ExtractColumnDataForAnySV(UserInput)
 {
-	/*
-    Prompt := "What character separates the data?"
-	ErrorLevel =
 	
-	InputBox, OutputVar, Enter Data for ..., %Prompt%, %HIDE%, %Width%, %Height%, %X%, %Y%, , %Timeout%, %Dft%
-	while (strlen(OutputVar) < 1 and not ErrorLevel)
-	{
-		InputBox, OutputVar, Enter Data for ..., %Prompt%, %HIDE%, %Width%, %Height%, %X%, %Y%, , %Timeout%, %Dft%
-	}
-	
-	if ( ErrorLevel )
-		return ; User canceled
-	
-	delim := OutputVar
-    */
-    
-    vDelim := HelperAskUserForDelim()
+	vDelim := HelperAskUserForDelim()
 	
 	if ( StrLen(vDelim) == 0 )
 	{
@@ -257,8 +246,8 @@ ExtractColumnDataForAnySV(UserInput)
 HelperGetSVDataIntoRowsArray(data, delim)
 {
 	arrRows := Object()
-    
-    if ( delim == "\t" or delim == "`t" )
+	
+	if ( delim == "\t" or delim == "`t" )
 		delim := "`t"
 	
 	; Below loop/parse works for all tested scenarios: `r`n, `n, and a single line of text
@@ -276,7 +265,7 @@ HelperGetSVDataIntoRowsArray(data, delim)
 }
 
 HelperExtractColumnDataForAnySV(data, delim)
-{
+{	
 	if (!delim)
 		delim := HelperAskUserForDelim()
 	
@@ -285,8 +274,8 @@ HelperExtractColumnDataForAnySV(data, delim)
 		SB_SetText("Delimiter is not defined.")
 		return ; No delimiter found/given.
 	}
-    
-    ;arrRows := HelperGetSVDataIntoRowsArray(data, delim)
+	
+	;arrRows := HelperGetSVDataIntoRowsArray(data, delim)
 	myDSVTool.loadText(data, delim)
 	arrRows := myDSVTool.getData()
 
@@ -307,6 +296,7 @@ HelperExtractColumnDataForAnySV(data, delim)
 	}
 	
 	myDSVTool.extractColumnData(OutputVar)
+	
 	return myDSVTool.getResult()
 }
 
@@ -320,7 +310,6 @@ SwapColumnForCSV(UserInput)
 	vDelim := ","
 	vText := HelperSwapColumnDataForAnySV(vText, vDelim)
 	
-	;SetStatusMessageAndColor("Swap 1 Column's data (CSV).", "Green")
 	SB_SetText("Swap 1 Column's data (CSV).")
 	return vText
 }
@@ -331,30 +320,14 @@ SwapColumnForTSV(UserInput)
 	vDelim := "`t"
 	vText := HelperSwapColumnDataForAnySV(vText, vDelim)
 	
-	;SetStatusMessageAndColor("Swap 1 Column's data (TSV).", "Green")
 	SB_SetText("Swap 1 Column's data (TSV).")
 	return vText
 }
 
 SwapColumnForAnySV(UserInput)
 {
-	/*
-    Prompt := "What character separates the data?"
-	ErrorLevel =
 	
-	InputBox, OutputVar, Enter Data for ..., %Prompt%, %HIDE%, %Width%, %Height%, %X%, %Y%, , %Timeout%, %Dft%
-	while (strlen(OutputVar) < 1 and not ErrorLevel)
-	{
-		InputBox, OutputVar, Enter Data for ..., %Prompt%, %HIDE%, %Width%, %Height%, %X%, %Y%, , %Timeout%, %Dft%
-	}
-	
-	if ( ErrorLevel )
-		return ; User canceled
-	
-	vDelim := OutputVar
-    */
-    
-    vDelim := HelperAskUserForDelim()
+	vDelim := HelperAskUserForDelim()
 	
 	if ( StrLen(vDelim) == 0 )
 	{
@@ -364,11 +337,10 @@ SwapColumnForAnySV(UserInput)
 	
 	if ( vDelim == "\t" or vDelim == "`t" )
 		vDelim := "`t"
-        
-    vText := UserInput
-	vText := HelperSwapColumnDataForAnySV(vText, vDelim)
 	
-	;SetStatusMessageAndColor("Swap 1 Column's data (*SV).", "Green")
+	vText := UserInput
+	vText := HelperSwapColumnDataForAnySV(vText, vDelim)
+		
 	SB_SetText("Swap 1 Column's data (*SV).")
 	return vText
 }
@@ -435,64 +407,75 @@ HelperSwapColumnDataForAnySV(data, delim)
 	return retValue
 }
 
-
 FilterColumnDataForCSV(UserInput)
 {
-	Text := UserInput
+	vText := UserInput
 	delim := ","
-	Text := HelperFilterColumnDataForAnySV(Text, delim)
+	vText := HelperFilterColumnDataForAnySV(vText, delim)
 	
-	;SetStatusMessageAndColor("Filtered 1 Column's data (CSV).", "Green")
 	SB_SetText("Filtered 1 Column's data (CSV).")
-	return Text
+	return vText
 }
 
 FilterColumnDataForTSV(UserInput)
 {
-	Text := UserInput
+	vText := UserInput
 	delim := "`t"
-	Text := HelperFilterColumnDataForAnySV(Text, delim)
+	vText := HelperFilterColumnDataForAnySV(vText, delim)
 	
-	;SetStatusMessageAndColor("Filtered 1 Column's data (TSV).", "Green")
 	SB_SetText("Filtered 1 Column's data (TSV).")
-	return Text
+	return vText
 }
 
 FilterColumnDataForAnySV(UserInput)
-{
-	/*
-    Prompt := "What character separates the data?"
-	ErrorLevel =
-	
-	InputBox, OutputVar, Enter Data for ..., %Prompt%, %HIDE%, %Width%, %Height%, %X%, %Y%, , %Timeout%, %Dft%
-	while (strlen(OutputVar) < 1 and not ErrorLevel)
-	{
-		InputBox, OutputVar, Enter Data for ..., %Prompt%, %HIDE%, %Width%, %Height%, %X%, %Y%, , %Timeout%, %Dft%
-	}
-	
-	if ( ErrorLevel )
-		return ; User canceled
-	
-	delim := OutputVar
-    */
-    
-    vDelim := HelperAskUserForDelim()
+{	
+	vDelim := HelperAskUserForDelim()
 	
 	if ( StrLen(vDelim) == 0 )
 	{
-		SB_SetText("Delimiter is not defined.")
+		SB_SetText("Error: Delimiter is not defined.")
 		return ; No delimiter found/given.
 	}
 	
 	if ( vDelim == "\t" or vDelim == "`t" )
-		vDelim := "`t"
+		vDelim := "`t" ; Making sure tab is set. Also convenient for user to have two methods. \t is also used by Regex
 	
 	vText := UserInput
 	vText := HelperFilterColumnDataForAnySV(vText, vDelim)
 	
-	;SetStatusMessageAndColor("Filtered 1 Column's data (*SV).", "Green")
-	SB_SetText("Filtered 1 Column's data (*SV).")
+	SB_SetText("Success: Filtered 1 Column's data (*SV).")
 	return vText
+}
+
+HelperDynamicallyFindHeightForInputBox(vPromptText)
+{
+	; Count how many lines, then height = 125 + (17 * Lines)
+	StringReplace, OutputVar, vPromptText, `n,, UseErrorLevel
+	Height := 125 + (17 * (ErrorLevel))
+	
+	return Height
+}
+
+HelperBuildPickAColumn(vRowFirst)
+{
+	intColumns := vRowFirst.Length()
+
+	if ( intColumns < 1 )
+		return 0
+	
+	MessagePrompt := "Pick a number between 1 and " intColumns "."
+	return MessagePrompt
+	
+}
+
+HelperBuildVerticalSampleRow(vRowFirst)
+{
+	vSampleRow := 
+	Loop % vRowFirst.Length()
+		vSampleRow .= "`n" A_Index ": " vRowFirst[A_Index]
+	vSampleRow := SubStr(vSampleRow, StrLen("`n") + 1)
+	
+	return vSampleRow
 }
 
 HelperFilterColumnDataForAnySV(data, delim)
@@ -504,55 +487,25 @@ HelperFilterColumnDataForAnySV(data, delim)
 
 	if ( intColumns < 1 )
 		return
-
-	vSampleRow := 
-	Loop % arrRows[1].Length()
-		vSampleRow .= "`n" A_Index ": " arrRows[1][A_Index]
 	
-	vSampleRow := SubStr(vSampleRow, StrLen("`n") + 1)
-    
-    SampleRow := Join(arrRows[1], delim)
-	;Prompt := "Filter Column: Pick a number between 1 and " . intColumns . "`r`n`r`nHere is a Sample row: `r`n" . SampleRow
-	Prompt := "Filter Column: Pick a number between 1 and " . intColumns . "`n`nHere is a Sample row: `n" . vSampleRow
-	;Prompt := vSampleRow
-
-	/*
-	vHeight := Height
-	;Height := (intColumns * 25) + 100 + 50 ; Each line = 25, 4 lines before sample row; +50 for the textfield and buttons
-	Height := ((intColumns * 25) + 150) < 189 ? 189 : (intColumns * 25) + 150
-	*/
+	Prompt := HelperBuildPickAColumn(arrRows[1]) ; (vRowFirst)
 	
-	; Count how many lines, then height = 125 + (17 * Lines)
-	StringReplace, OutputVar, Prompt, `n,, UseErrorLevel
-	Height := 125 + (17 * (ErrorLevel))
-    
-    ErrorLevel =
+	if ( Prompt == 0 ) {
+		SB_SetText("Error: No columns found.")
+		return
+	}
+	
+	vSampleRow := HelperBuildVerticalSampleRow(arrRows[1]) ; (vRowFirst)
+	Prompt := "Filter Column: " Prompt "`n`nHere is a Sample row: `n" vSampleRow
+	Height := HelperDynamicallyFindHeightForInputBox(Prompt) ; (vPromptText)
+	
+	ErrorLevel =
 	InputBox, OutputVar, Enter Data for ..., %Prompt%, %HIDE%, %Width%, %Height%, %X%, %Y%, , %Timeout%, %Dft%
+	
 	while (ErrorLevel == 1 or strlen(OutputVar) < 1 or OutputVar = " " or OutputVar > intColumns or OutputVar < 1)
 	{
 		InputBox, OutputVar, Enter Data for ..., %Prompt%, %HIDE%, %Width%, %Height%, %X%, %Y%, , %Timeout%, %Dft%
 	}
-
-	/*
-	NewLine := "`r`n"
-	retValue := 
-	
-	for indexRow, elementRow in arrRows
-	{
-		retValue .= NewLine 
-		for indexColumn, elementColumn in arrRows[indexRow]
-		{
-			if (indexColumn == OutputVar)
-				continue
-			else
-				retValue .= elementRow[indexColumn] . delim
-		}
-		retValue := Substr(retValue, 1, StrLen(retValue) - StrLen(delim)) ; Remove last delimiter added
-	}
-	
-	retValue := SubStr(retValue, StrLen(NewLine) + 1) ; Remove initial NewLine
-	return retValue
-	*/
 	
 	return HelperFilterColumnDataForColumn(data, delim, OutputVar)
 }
@@ -567,6 +520,7 @@ HelperFilterColumnDataForColumn(data, delim, columnFilter)
 	for indexRow, elementRow in arrRows
 	{
 		retValue .= NewLine 
+		
 		for indexColumn, elementColumn in arrRows[indexRow]
 		{
 			if (indexColumn == columnFilter)
@@ -574,6 +528,7 @@ HelperFilterColumnDataForColumn(data, delim, columnFilter)
 			else
 				retValue .= elementRow[indexColumn] . delim
 		}
+		
 		retValue := Substr(retValue, 1, StrLen(retValue) - StrLen(delim)) ; Remove last delimiter added
 	}
 	
@@ -583,45 +538,27 @@ HelperFilterColumnDataForColumn(data, delim, columnFilter)
 
 SortDataByColumnCSV(UserInput)
 {
-	Text := UserInput
+	vText := UserInput
 	delim := ","
-	Text := HelperSortDataByColumnForAnySV(Text, delim)
+	vText := HelperSortDataByColumnForAnySV(vText, delim)
 	
-	;SetStatusMessageAndColor("Filtered 1 Column's data (CSV).", "Green")
 	SB_SetText("Sorted Column's data (CSV).")
-	return Text
+	return vText
 }
 
 SortDataByColumnTSV(UserInput)
 {
-	Text := UserInput
+	vText := UserInput
 	delim := "`t"
-	Text := HelperSortDataByColumnForAnySV(Text, delim)
+	vText := HelperSortDataByColumnForAnySV(vText, delim)
 	
-	;SetStatusMessageAndColor("Filtered 1 Column's data (CSV).", "Green")
 	SB_SetText("Sorted Column's data (TSV).")
-	return Text
+	return vText
 }
 
 SortDataByColumnForAnySV(UserInput)
-{
-	/*
-	Prompt := "What character separates the data?"
-	ErrorLevel =
-	
-	InputBox, OutputVar, Enter Data for ..., %Prompt%, %HIDE%, %Width%, %Height%, %X%, %Y%, , %Timeout%, %Dft%
-	while (strlen(OutputVar) < 1 and not ErrorLevel)
-	{
-		InputBox, OutputVar, Enter Data for ..., %Prompt%, %HIDE%, %Width%, %Height%, %X%, %Y%, , %Timeout%, %Dft%
-	}
-	
-	if ( ErrorLevel )
-		return ; User canceled
-	
-	delim := OutputVar
-    */
-    
-    vDelim := HelperAskUserForDelim()
+{	
+	vDelim := HelperAskUserForDelim()
 	
 	if ( StrLen(vDelim) == 0 )
 	{
@@ -635,7 +572,6 @@ SortDataByColumnForAnySV(UserInput)
 	vText := UserInput
 	vText := HelperSortDataByColumnForAnySV(vText, vDelim)
 	
-	;SetStatusMessageAndColor("Filtered 1 Column's data (*SV).", "Green")
 	SB_SetText("Sorted Column data (*SV).")
 	return vText
 }
@@ -643,7 +579,6 @@ SortDataByColumnForAnySV(UserInput)
 ; Sort CSV by Column Number chosen
 HelperSortDataByColumnForAnySV(data, delim)
 {
-	;vText := "one,banana,three`napple,two,mouse`ncomputer,monitor,cranberry"
 	vText := data
 	vDelim := delim
 	arrData := HelperGetSVDataIntoRowsArray(vText, vDelim)
@@ -664,7 +599,6 @@ HelperSortDataByColumnForAnySV(data, delim)
 		InputBox, OutputVar, Enter Data for ..., %Prompt%, %HIDE%, %Width%, %Height%, %X%, %Y%, , %Timeout%, %Dft%
 	}
 	
-	;vColumnSort := 3	; Variable to change by user
 	vColumnSort := OutputVar
 	
 	hasHeader := false
@@ -689,19 +623,15 @@ HelperSortDataByColumnForAnySV(data, delim)
 		
 		InnerLoopCount := arrData.MaxIndex() - Outer
 		Inner := Outer + 1
-		;MsgBox % "InnerLoopCount: " InnerLoopCount
 		
 		Loop % InnerLoopCount
 		{
-			;MsgBox % "Outer: " Outer ", Inner: " Inner
 			
 			if ( arrData[Outer][vColumnSort] > arrData[Inner][vColumnSort])
 			{
-				;MsgBox % "Outer: " arrData[Outer][vColumnSort] ", Inner: " arrData[Inner][vColumnSort]
 				temp := arrData[Inner]
 				arrData[Inner] := arrData[Outer]
 				arrData[Outer] := temp
-				;MsgBox % "Outer: " arrData[Outer][vColumnSort] ", Inner: " arrData[Inner][vColumnSort]
 			}
 			
 			Inner += 1
@@ -711,11 +641,8 @@ HelperSortDataByColumnForAnySV(data, delim)
 	vResults :=
 	Loop % arrData.MaxIndex()
 	{
-		;MsgBox % "Index: " A_Index
 		vResults .= "`n"
 		vResults .= Join(arrData[A_Index], ",")
-		;MsgBox % "@: " @
-		;MsgBox % arrData[A_Index][1] ", " arrData[A_Index][2] ", " arrData[A_Index][3]
 	}
 
 	return SubStr(vResults, StrLen("`n")+1)
@@ -810,23 +737,8 @@ HelperSpacedColumnForAnySV(vText, vDelim, hasHeader := false)
 
 SpacedColumnForAnySV(UserInput)
 {
-	/*
-    Prompt := "What character separates the data?"
-	ErrorLevel =
 	
-	InputBox, OutputVar, Enter Data for ..., %Prompt%, %HIDE%, %Width%, %Height%, %X%, %Y%, , %Timeout%, %Dft%
-	while (strlen(OutputVar) < 1 and not ErrorLevel)
-	{
-		InputBox, OutputVar, Enter Data for ..., %Prompt%, %HIDE%, %Width%, %Height%, %X%, %Y%, , %Timeout%, %Dft%
-	}
-	
-	if ( ErrorLevel )
-		return ; User canceled
-        
-    vDelim := OutputVar
-	*/
-    
-    vDelim := HelperAskUserForDelim()
+	vDelim := HelperAskUserForDelim()
 	
 	if ( StrLen(vDelim) == 0 )
 	{
@@ -836,91 +748,163 @@ SpacedColumnForAnySV(UserInput)
 	
 	if ( vDelim == "\t" or vDelim == "`t" )
 		vDelim := "`t"
-    
+	
 	MsgBox, 4, Data Table, First row header row? (Yes or No)
 	IfMsgBox Yes
 		hasHeader := true
 	
 	vText := UserInput
-    
-    /*
+	
+	return HelperSpacedColumnForAnySV(vText, vDelim, hasHeader)
+}
+
+
+HelperFindRowMaxWidth(arrData) {
+	; Find the max width per column for each row
+	rowMaxWidth := Object()
+
+	Loop, % arrData.MaxIndex()
+	{ ; Rows[X]
+		xIndex := A_Index ; row Index
+		
+		Loop, % arrData[xIndex].MaxIndex()
+		{ ; Row Items [X,Y]
+			yIndex := A_Index ; column index
+			
+			if ( yIndex == 1 ) {
+				rowMaxWidth[xIndex] := StrLen(arrData[xIndex][yIndex])
+				
+			} else if (rowMaxWidth[xIndex] < StrLen(arrData[xIndex][yIndex]) ) {
+				rowMaxWidth[xIndex] := StrLen(arrData[xIndex][yIndex])
+			}
+		}
+	}
+	
+	return rowMaxWidth ; row[#] := max width
+}
+
+HelperSpacedColumnVerticallyForAnySV(vText, vDelim, hasHeader:=false){
+	; Displays row data as vertical lists, where the first row is normally descriptive text
+	;
+	; Psuedo Code
+	; 1.) Put data into 2-D Array
+	; 2.) Loop on number of columns (use row 1 as an example)
+	; 3.) Loop on number of rows
+	; 4.) Print out data, which the row changes faster than the column (print by column rather than by row)
+
 	arrData := HelperGetSVDataIntoRowsArray(vText, vDelim)
-	colMaxWidth := HelperFindColumnMaxWidth(arrData)
+	rowMaxWidth := HelperFindRowMaxWidth(arrData)
+
+	colBetweenSpace := 2
+	@ :=
+	NewLine := "`r`n"
+
+	; 2-D Array should be a square/rectangle, where positions are X,Y
 	
-	SB_SetText("Done.")
+	Loop, % arrData[1].MaxIndex()
+	{ ; Columns
+		cIndex := A_Index
+		@ .= NewLine
+		
+		Loop, % arrData.MaxIndex()
+		{ ; Rows
+			rIndex := A_Index
+			
+			if ( rIndex == arrData.MaxIndex() )
+				@ .= arrData[rIndex][cIndex]
+			else {
+				vLength := rowMaxWidth[rIndex] + colBetweenSpace
+				vText := arrData[rIndex][cIndex]
+				vDirection := "Right"
+				
+				if ( hasHeader && rIndex == 1 )
+				{
+					vLength := vLength - 2
+					vDirection := "Left"
+					@ .= HelperPadSpaces(vLength, vText, vDirection) ": "
+					
+				} else {
+					@ .= HelperPadSpaces(vLength, vText, vDirection)
+				}
+			}
+				
+		}
+	}
 	
-	if ( hasHeader )
-		return HelperPrintSpacedColumns(arrData, colMaxWidth, true)
-	else
-		return HelperPrintSpacedColumns(arrData, colMaxWidth, false)
-    */
-    
-    return HelperSpacedColumnForAnySV(vText, vDelim, hasHeader)
+	return SubStr(@, StrLen(NewLine)+1)
+}
+
+SpacedColumnVerticalForAnySV(UserInput){
+	
+	vText := UserInput
+	vDelim := HelperAskUserForDelim()
+	
+	if ( StrLen(vDelim) == 0 )
+	{
+		SB_SetText("Delimiter is not defined.")
+		return ; No delimiter found/given.
+	}
+	
+	if ( vDelim == "\t" or vDelim == "`t" )
+		vDelim := "`t"
+	
+	hasHeader := false
+	MsgBox, 4, Data Table, First column header column? (Yes or No)
+	IfMsgBox Yes
+		hasHeader := true
+	
+	return HelperSpacedColumnVerticallyForAnySV(vText, vDelim, hasHeader)
 }
 
 TextDuplicateXTimes(UserInput){
 	; Input: (1) Single line of text, (2) Number of times to duplicate
 	; Output: Duplicated text (on multiple lines)
 	
-	;If ("" <> Text := Clip()) {
-	Text := UserInput
-		
-		Lines := StrSplit(Text, "`r`n")
-		
-		if (Lines.Length() > 1) {
-			;MsgBox,,SelectedTextDuplicateXTimes,Please only select/copy one line of text for processing. Thank you.
-			;SetStatusMessageAndColor("Select/copy one line of text for processing.","Red")
-			SB_SetText("Select/copy one line of text for processing.")
-			return
-		}
+	vText := UserInput
+	Lines := StrSplit(vText, "`r`n")
+	
+	if (Lines.Length() > 1) {
+		SB_SetText("Select/copy one line of text for processing.")
+		return
+	}
 
-		Prompt = "Increment how many times?"
-		InputBox, varTimes, Enter Data for ..., %Prompt%, %HIDE%, %Width%, %Height%, %X%, %Y%, , %Timeout%, %Dft%
+	Prompt = "Increment how many times?"
+	InputBox, varTimes, Enter Data for ..., %Prompt%, %HIDE%, %Width%, %Height%, %X%, %Y%, , %Timeout%, %Dft%
 
-		if varTimes is integer
+	if varTimes is integer
+	{
+		if ( varTimes > 0 )
 		{
-			if ( varTimes > 0 )
-			{
-				NewLine := "`r`n"
-				@ := Text
-				
-				Loop % varTimes
-				{
-					@ .= NewLine Text
-				}
-				
-				;Clip(@)
-				;SetStatusMessageAndColor("Input duplicated X times.", "Green")
-				SB_SetText("Input duplicated X times.")
-				return @
-			}
-		} else 
-		{
-			;MsgBox % "Not a valid number."
-			;SetStatusMessageAndColor("Not a valid number.","Red")
-			SB_SetText("Not a valid number.")
-			return
+			NewLine := "`r`n"
+			@ := vText
+			
+			Loop % varTimes
+				@ .= NewLine vText
+			
+			SB_SetText("Input duplicated X times.")
+			return @
 		}
-	;}
+		
+	} else {
+		SB_SetText("Not a valid number.")
+		return
+	}
 }
 
 TextDuplicateIncrementLastNumberXTimes(UserInput){
 	; Input: Single line of text
 	; Output: Duplicated text, where the last number is incremented x amount of times.
 	
-	Text := UserInput
-		
-	Lines := StrSplit(Text, "`r`n")
+	vText := UserInput
+	Lines := StrSplit(vText, "`r`n")
 	
 	if (Lines.Length() > 1) {
-		;MsgBox,,SelectedTextDuplicateIncrementLastNumberXTimes,Please only select/copy one line of text for processing. Thank you.
-		;SetStatusMessageAndColor("Select/copy one line of text for processing","Red")
 		SB_SetText("Select/copy one line of text for processing")
 		return
 	}
 	
 	; DEBUG
-	;Text := "C:\Path\To\File\12345\12345_0001.tif"
+	;vText := "C:\Path\To\File\12345\12345_0001.tif"
 
 	; Regular expression used: [1-9]+[0-9]*
 	;  - To avoid counting padded zeroes, we'll check for numbers above zero and
@@ -931,7 +915,7 @@ TextDuplicateIncrementLastNumberXTimes(UserInput){
 	Matches := []
 	MatchPositions := []
 	pos = 1
-	While pos := RegExMatch(Text,"[1-9]+[0-9]*", match, pos+StrLen(match))
+	While pos := RegExMatch(vText,"[1-9]+[0-9]*", match, pos+StrLen(match))
 	{
 		Matches.Push(match)
 		MatchPositions.Push(pos)
@@ -940,33 +924,44 @@ TextDuplicateIncrementLastNumberXTimes(UserInput){
 	Prompt = "Increment how many times?"
 	InputBox, varTimes, Enter Data for ..., %Prompt%, %HIDE%, %Width%, %Height%, %X%, %Y%, , %Timeout%, %Dft%
 
-	if varTimes is integer
+	if varTimes is integer 
 	{
 		if ( varTimes > 0 )
 		{
 			Replacement := Matches[Matches.MaxIndex()] + 0
 			LastPos := MatchPositions[MatchPositions.MaxIndex()]
 			NewLine := "`r`n"
-			@ := Text
+			@ := vText
 			
 			Loop % varTimes
 			{
 				Replacement += 1
-				strNew := RegExReplace(Text, "[\d]+", Replacement, , , LastPos)
+				strNew := RegExReplace(vText, "[\d]+", Replacement, , , LastPos)
 				@ .= NewLine strNew
 			}
 			
-			;SetStatusMessageAndColor("Duplicated and incremented input X times.", "Green")
 			SB_SetText("Duplicated and incremented input X times.")
 			return @
 		}
-	} else 
-	{
-		;MsgBox % "Not a valid number."
-		;SetStatusMessageAndColor("Not a valid number.","Red")
+		
+	} else {
 		SB_SetText("Not a valid number.")
 		return
 	}
+}
+
+HelperFlattenTextSingleLine(vText) {
+	vText := Trim(vText)
+	;Decide whether or not to leave a space between joined lines.
+	vText := RegExReplace(vText, "`r`n", "") ; Remove CRLF and replace with nothing
+	vText := RegExReplace(vText, "`n", "")   ; Remove CR
+	vText := RegExReplace(vText, "`r", "")   ; Remove LF
+	
+	/* User should use Join w/ Char to put spaces in between. And Reduce Whitespace for that.
+	vText := RegExReplace(vText, "\s", " ") ; Convert any whitespace char (space, tab, newline)
+	vText := RegExReplace(vText, "\s+", " ") ; Converts grouped spaces (1 or more)
+	*/
+	return vText
 }
 
 TextFlattenSingleLine(UserInput)
@@ -977,11 +972,14 @@ TextFlattenSingleLine(UserInput)
 	;
 	; NOTE: Do not change to remove space between. TextFlattenMultiLine + Join Lines should allow without the space.
 	
+	/*
 	vText := Trim(UserInput)
 	vText := RegExReplace(vText, "\s", " ") ; Convert any whitespace char (space, tab, newline)
 	vText := RegExReplace(vText, "\s+", " ") ; Converts grouped spaces (1 or more)
+	*/
 	
-	;SetStatusMessageAndColor("Flattened input to one line.", "Green")
+	vText := HelperFlattenTextSingleLine(UserInput)
+	
 	SB_SetText("Flattened input to one line.")
 	return vText
 }
@@ -994,18 +992,13 @@ TextFlattenMultiLine(UserInput) {
 	vText := UserInput
 	NewLine := "`r`n"
 	@ := ""
+	
 	Loop, Parse, vText, `n, `r
 	{
-		/*
-		vText := Trim(A_LoopField)
-		vText := RegExReplace(vText, "\s", " ") ; Convert any whitespace char (space, tab, newline)
-		vText := RegExReplace(vText, "\s+", " ") ; Converts grouped spaces (1 or more)
-		*/
 		vText := TextFlattenSingleLine(A_LoopField)
 		@ .= NewLine vText
-	}
-		
-	;SetStatusMessageAndColor("Flattened input each line.", "Green")
+	}		
+	
 	SB_SetText("Flattened input each line.")
 	return SubStr(@, StrLen(NewLine) + 1)
 }
@@ -1015,46 +1008,36 @@ TextFormatIndentMore(UserInput)
 	; https://autohotkey.com/board/topic/70404-clip-send-and-retrieve-text-using-the-clipboard/
 	; Indent a block of text. (This introduces a small delay for typing a normal tab; to avoid this you can use ^Tab / ^+Tab as a hotkey instead.)
 	
-	Text := UserInput
+	vText := UserInput
 	TabChar := A_Tab ; this could be something else, say, 4 spaces
 	NewLine := "`r`n"
 	
-	;If ("" <> Text := Clip()) {
-		@ := ""
-		Loop, Parse, Text, `n, `r
-			@ .= NewLine (InStr(A_ThisHotkey, "+") ? SubStr(A_LoopField, (InStr(A_LoopField, TabChar) = 1) * StrLen(TabChar) + 1) : TabChar A_LoopField)
-		
-		;Clip(SubStr(@, StrLen(NewLine) + 1), 2)
-		;SetStatusMessageAndColor("Indented more.", "Green")
-		SB_SetText("Indented more.")
-		return SubStr(@, StrLen(NewLine) + 1)
-	;} Else
-	;	Send % (InStr(A_ThisHotkey, "+") ? "+" : "") "{Tab}"
+	@ := ""
+	Loop, Parse, vText, `n, `r
+		@ .= NewLine (InStr(A_ThisHotkey, "+") ? SubStr(A_LoopField, (InStr(A_LoopField, TabChar) = 1) * StrLen(TabChar) + 1) : TabChar A_LoopField)
+	
+	SB_SetText("Indented more.")
+	return SubStr(@, StrLen(NewLine) + 1)
 }
 
 TextFormatIndentLess(UserInput){
 	
-	Text := UserInput
+	vText := UserInput
 	TabChar := A_Tab
 	NewLine := "`r`n"
 	
 	@ := ""
-	Loop, Parse, Text, `n, `r
+	Loop, Parse, vText, `n, `r
 	{
 		; If we find a tab at the beginning of the string, substring remove it to "indent less"
 		FoundPos := RegExMatch(A_LoopField, "O)(^\t)", RegExMatchOutputVar)
+		
 		if (RegExMatchOutputVar.Count() > 0)
-		{
-			@ .= NewLine
-			@ .= SubStr(A_LoopField, StrLen(A_Tab)+1)
-		}
+			@ .= NewLine SubStr(A_LoopField, StrLen(A_Tab)+1)
 		else
-		{
 			@ .= NewLine A_LoopField
-		}
 	}
 
-	;SetStatusMessageAndColor("Indented less.", "Green")
 	SB_SetText("Indented less.")
 	return SubStr(@, StrLen(NewLine) + 1)
 }
@@ -1064,32 +1047,12 @@ TextFormatTelephoneNumber(UserInput)
 	; Formats the Clipboard value to (###) ###-#### format
 	; Ex: 1234567890 --> (123) 456-7890
 	
-	/*
-	Text := UserInput
-	
-	;FoundPos := RegExMatch(Clipboard, "O)(\d{10})", RegExMatchOutputVar)
-	FoundPos := RegExMatch(Text, "O)(\d{10})", RegExMatchOutputVar)
-	if ( RegExMatchOutputVar.Count() > 0 )
-	{
-		
-		strTelephoneNumber := RegExMatchOutputVar.Value(0)
-		strTelephoneNumber := "(" . SubStr(strTelephoneNumber, 1, 3) . ") " . SubStr(strTelephoneNumber, 4, 3) . "-" . Substr(strTelephoneNumber, 7, 4)
-		;MsgBox % strTelephoneNumber " has been added to the Windows Clipboard."
-		;Clipboard := strTelephoneNumber
-		return strTelephoneNumber
-	}
-	*/
-	
-	;vText := "0123456789`n9876543210`n876374827"
 	vText := UserInput
 	vFormatted := RegExReplace(vText, "(\d{1})(\d{3})(\d{3})(\d{3})", "$1-($2) $3-$4")
 	vFormatted := RegExReplace(vFormatted, "(\d{3})(\d{3})(\d{3})", "($1) $2-$3")
-	;MsgBox % vFormatted
 	
-	;SetStatusMessageAndColor("Formatted numbers (Telephone).", "Green")
 	SB_SetText("Formatted numbers (Telephone).")
 	return vFormatted
-	
 }
 
 TextGetDateFromMMDDYYYY(UserInput){
@@ -1097,33 +1060,26 @@ TextGetDateFromMMDDYYYY(UserInput){
 	; Ex: 1/1/2010 = Friday, January 1, 2010
 	;datestring := "1/1/2010"
 	
-	;strDate := Clipboard
-	Text := UserInput
-	;FoundPos := RegExMatch(strDate, "O)(\d+\/\d+\/\d+)", RegExMatchOutputVar)
-	FoundPos := RegExMatch(Text, "O)(\d+\/\d+\/\d+)", RegExMatchOutputVar)
+	vText := UserInput
+
+	FoundPos := RegExMatch(vText, "O)(\d+\/\d+\/\d+)", RegExMatchOutputVar)
+	
 	if ( RegExMatchOutputVar.Count() > 0 ) {
 		;MsgBox % RegExMatchOutputVar.Value(0)
 		SetFormat, float, 02.0
 		StringSplit, d, strDate, / 
 		FormatTime, FullDate, % d3 . d1+0. . d2+0., dddd, MMMM d, yyyy
 		;MsgBox % FullDate " has been added to the Windows Clipboard."
-		;Clipboard := FullDate
-		;SetStatusMessageAndColor("Got Full Date.", "Green")
-		SB_SetText("Got Full Date.")
+		
+		SB_SetText("Full Date returned.")
 		return FullDate
 	}
 	else
-	{
-		;Msgbox % "No date found in Windows Clipboard to process. Aborted."
-		;SetStatusMessageAndColor("No date found in Windows Clipboard to process. Aborted.","Red")
-		SB_SetText("No date found in Windows Clipboard to process. Aborted.")
-	}
-		
+		SB_SetText("No date found in Windows Clipboard to process. Aborted.")	
 }
 
 TextGenerateLoremIpsum()
 {
-	;SetStatusMessageAndColor("Generated text (Lorem Ipsum).", "Green")
 	SB_SetText("Generated text (Lorem Ipsum).")
 	return "Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum."
 }
@@ -1137,31 +1093,18 @@ TextJoinLinesWithChar(UserInput) {
 	; 4.) Loop by new line
 	;      - For each line, split and join
 	
-	Text := UserInput
+	vText := UserInput
 	
 	Prompt = "Join lines by..."
 	InputBox, varJoiner, Enter Data for ..., %Prompt%, %HIDE%, %Width%, %Height%, %X%, %Y%, , %Timeout%, %Dft%
 	
-	/*
-	vResults :=
-	
-	Loop, Parse, Text, `n, `r 
-		vResults .= varJoiner A_LoopField
-	
-	if (StrLen(varJoiner) > 0)
-		vResults := Substr(vResults, StrLen(varJoiner) + 1) ; Remove excess "varJoiner" from the beginning of the first line
-	
 	SB_SetText("Joined lines w/ or w/o character.")
-	return vResults
-	*/
-	
-	SB_SetText("Joined lines w/ or w/o character.")
-	return HelperTextJoinLinesWithChar(Text, varJoiner)
+	return HelperTextJoinLinesWithChar(vText, varJoiner)
 }
 
 HelperTextJoinLinesWithChar(vText, vJoinChar)
 {
-	vResults :=
+	vResults := 
 	
 	Loop, Parse, vText, `n, `r 
 		vResults .= vJoinChar A_LoopField
@@ -1193,29 +1136,27 @@ TextJoinSplittedLineWithChar(UserInput) {
 	; 4.) Loop by new line
 	;      - For each line, split and join
 	
-	Text := UserInput
+	vText := UserInput
 		
 	Prompt = "Split text by..."
 	InputBox, varSplitter, Enter Data for ..., %Prompt%, %HIDE%, %Width%, %Height%, %X%, %Y%, , %Timeout%, %Dft%
 	
-	if ( StrLen(varSplitter) > 0 ) {
-		
-		Prompt = "Join lines by..."
-		InputBox, varJoiner, Enter Data for ..., %Prompt%, %HIDE%, %Width%, %Height%, %X%, %Y%, , %Timeout%, %Dft%
-		
-		if ( StrLen(varJoiner) > 0 ) {
-			
-			TextArray := StrSplit(Text, varSplitter)
-			@ := Join(TextArray, varJoiner)
-			
-			SB_SetText("Joined splitted line with character.")
-			return @
-		}
-	}
-	else
-	{
+	if ( StrLen(varSplitter) == 0 ) {
 		SB_SetText("Missing defined character that splits the data.")
+		return
 	}
+		
+	Prompt = "Join lines by..."
+	InputBox, varJoiner, Enter Data for ..., %Prompt%, %HIDE%, %Width%, %Height%, %X%, %Y%, , %Timeout%, %Dft%
+
+	;if ( StrLen(varJoiner) > 0 ) { ; Lets allow the user to either join with a character or not
+		
+		TextArray := StrSplit(vText, varSplitter)
+		@ := Join(TextArray, varJoiner)
+		
+		SB_SetText("Joined splitted line with character.")
+		return @
+	;}
 }
 ; -----------------------------------------------------------------------------------------------------------
 
@@ -1228,7 +1169,7 @@ TextJoinSplittedLinesWithChar(UserInput) {
 	; 4.) Loop by new line
 	;      - For each line, split and join
 	
-	Text := UserInput
+	vText := UserInput
 	
 	Prompt = "Split text by..."
 	InputBox, varSplitter, Enter Data for ..., %Prompt%, %HIDE%, %Width%, %Height%, %X%, %Y%, , %Timeout%, %Dft%
@@ -1243,13 +1184,13 @@ TextJoinSplittedLinesWithChar(UserInput) {
 			NewLine := "`r`n"
 			@ :=
 			
-			Loop, Parse, Text, `n, `r 
+			Loop, Parse, vText, `n, `r 
 			{
 				TextArray := StrSplit(A_LoopField, varSplitter)
 				@ .= NewLine Join(TextArray, varJoiner)
 			}
 			
-			;SetStatusMessageAndColor("Joined splitted lines with character.", "Green")
+			
 			SB_SetText("Joined splitted lines with character.")
 			return SubStr(@, StrLen(NewLine) + 1)
 		}
@@ -1275,10 +1216,10 @@ OpenLinkRegExr()
 ; Replaces unfriendly Windows OS Filesystem characters with an underscore
 ; "A file name can't contain any of the following characters: \ / : * ? " < > |
 TextMakeWindowsFileFriendly(UserInput) {
-	Text := UserInput
+	vText := UserInput
 	@ := ""
 	
-	Loop, Parse, Text, `n, `r 
+	Loop, Parse, vText, `n, `r 
 	{
 		tempText := A_LoopField
 		; To escape a double quote ("), use two back-to-back so ""
@@ -1296,6 +1237,52 @@ TextMakeWindowsFileFriendly(UserInput) {
 
 	SB_SetText("Characters are now Windows Filesystem friendly.")
 	return SubStr(@, StrLen(tempText) + 1)
+}
+; -----------------------------------------------------------------------------------------------------------
+
+; -----------------------------------------------------------------------------------------------------------
+TextPrefixNestedList(UserInput){
+	NewLine := "`r`n"
+	charPrefixLevel := "\_" ; Each line
+	charPrefixList := "|_" ; Each tabbed-in line
+	countLevel := 0
+	
+	; Level 0
+	; \_Level 1
+	;  \_Level 2
+	; ....
+	
+	vText := UserInput
+	
+	@ := ""
+	Loop, Parse, vText, `n, `r 
+	{
+		
+		; First see if there is text. Then, prefix the text part only (for example, indented text)
+		MatchedPosition := RegExMatch(A_LoopField, "O)([\S].+)", RegExMatchOutputVar) ; Testing to see if the line is not empty by having characters other than invisible ones
+		if ( RegExMatchOutputVar.Count() > 0 )
+		{	
+			if (countLevel == 0)
+			{
+				@ .= NewLine
+				@ .= A_LoopField
+				countLevel += 1
+				continue
+			}			
+			
+			vLine := A_LoopField
+			vLength := countLevel + 1 + StrLen(vLine) ; 2 for "\_"
+			vDirection := "Left"
+			
+			@ .= NewLine
+			@ .= HelperPadSpaces(vLength, "\_" . A_LoopField, vDirection)
+			
+			countLevel += 1
+		}
+	}
+	
+	SB_SetText("Created a nested list.")
+	return SubStr(@, StrLen(NewLine) + 1)
 }
 ; -----------------------------------------------------------------------------------------------------------
 
@@ -1322,7 +1309,6 @@ TextPrefixCustomRepeatingCharacter(UserInput){
 	
 	if ( StrLen(OutputVar) < 1 or OutputVar == )
 	{
-		;SetStatusMessageAndColor("Invalid user input (TextPrefixCustomRepeatingCharacter).", "Red")
 		SB_SetText("Invalid user input (TextPrefixCustomRepeatingCharacter).")
 		return
 	}
@@ -1330,10 +1316,10 @@ TextPrefixCustomRepeatingCharacter(UserInput){
 	NewLine := "`r`n"
 	vCustomChar := OutputVar
 	OrdinalText := vCustomChar . A_Space
-	Text := UserInput
+	vText := UserInput
 	@ := ""
 	
-	Loop, Parse, Text, `n, `r 
+	Loop, Parse, vText, `n, `r 
 	{
 		; First see if there is text. Then, prefix the text part only (for example, indented text)
 		MatchedPosition := RegExMatch(A_LoopField, "O)([\S].+)", RegExMatchOutputVar)
@@ -1344,7 +1330,6 @@ TextPrefixCustomRepeatingCharacter(UserInput){
 		}
 	}
 	
-	;SetStatusMessageAndColor("Created list with Unordered Custom Character.", "Green")
 	SB_SetText("Created list with Unordered Custom Character.")
 	return SubStr(@, StrLen(NewLine) + 1)
 }
@@ -1367,13 +1352,20 @@ TextPrefixOrdinalNumber(UserInput) {
 	;   Text Line Item\r\n  --> 2. Text Line Item
 	;   Text Line Item\r\n  --> 3. Text Line Item
 	
+	; Ask the user if indented items should be renumbered
+	; 1 -> 2 -> 3 vs. 1 -> 1.1 -> 1.2
+	renumber := false
+	MsgBox, 4, Text to List, Renumber indented lines of text? (Yes or No)
+	IfMsgBox Yes
+		renumber := true
+
 	NewLine := "`r`n"
 	Numeral := 1 ; Ordinal number listing starts with 1
 	
-	Text := UserInput
+	vText := UserInput
 	
 	@ := ""
-	Loop, Parse, Text, `n, `r 
+	Loop, Parse, vText, `n, `r 
 	{
 		; First see if there is text. Then, prefix the text part only (for example, indented text)
 		MatchedPosition := RegExMatch(A_LoopField, "O)([\S].+)", RegExMatchOutputVar)
@@ -1385,11 +1377,106 @@ TextPrefixOrdinalNumber(UserInput) {
 			Numeral += 1
 		}
 	}
-
-	;SetStatusMessageAndColor("Created list with ordered numbers.", "Green")
+	
 	SB_SetText("Created list with ordered numbers.")
 	return SubStr(@, StrLen(NewLine) + 1)
 }
+
+TextPrefixOrdinalNumberRenumberIndented(UserInput){
+
+	; Line 1				->	1. Line 1
+	; 	Indented Line 2		->		1.1. Indented Line 2
+	;   Indented Line 3		->  	1.2. Indented Line 3
+	;		Indented Line 4 ->			1.2.1. Indented Line 4
+	
+	; 1.) First organize lines into an array so we know how to number
+	; 2.) Loop through array and prefix lines with proper numbering
+	; 3.) Print results
+	
+	vText := UserInput
+	;vText := "Line 1`nLine 2`nLine 3" ; 1 Level
+	;vText := "Line 1`n`tLine 2`n`tLine 3" ; 2 Levels
+	;vText := "Line 1`n`tLine 2`n`tLine 2`n`t`tLine 3`n`t`tLine 3" ; 3 Levels
+	;vText := "Line 1`n`tLine 2`n`tLine 2`n`t`tLine 3`n`t`tLine 3`nLine 1`n`tLine 2`n`tLine 2`n`t`tLine 3`n`t`tLine 3" ; 3 Levels - 2 Lists
+	;vText := "Line 1`n`tLine 2`n`t`tLine 3`n`t`tLine 3`n`tLine 2`n`tLine 2`n`t`tLine 3`n`t`tLine 3" ; in and out levels
+	
+	vResult :=
+	
+	NewLine := "`r`n"
+	
+	vArrIndentCounter := Array()
+	; vArrIndentCounter[]
+	; First position is 0 level and cannot be cleared
+	; Second position is tab level 1, and is cleared when a line with no tabs is found
+	; Third position is tab level 2, and is cleared when a line has no tab or only 1 tab level
+	; Fourth position is tab level 3, and is cleared when a line has no tab or only 1/2 tab levels
+	; ....
+	
+	; 1.) First organize lines into an array so we know how to number, based on tabs present
+	Loop, Parse, vText, `n, `r
+	{
+		vLine := A_LoopField
+		vPrefix := 
+		
+		if ( SubStr(vLine, 1, 1) != A_Tab )
+		{
+			
+			if ( !vArrIndentCounter.MaxIndex() ) {
+				vArrIndentCounter.Push(1)
+			} else {
+				vArrIndentCounter[1] := vArrIndentCounter[1] + 1
+			
+				Loop % (vArrIndentCounter.MaxIndex() - 1)
+					vArrIndentCounter.Pop() ; Remove the levels after the first
+			}
+		
+			vPrefix := vArrIndentCounter[1] . ". "
+			
+			if ( vPrefix != "1. " )
+				vResult .= NewLine
+			
+			vResult .= NewLine vPrefix A_LoopField
+			
+		} else {
+		
+			vIndentCounter := 1 ; Not zero based ; 1 is first level or not indented
+		
+			Loop % StrLen(vLine)
+			{
+				if ( SubStr(vLine, A_Index, 1) == A_Tab )
+					vIndentCounter += 1
+				else
+					break
+			}
+			
+			; Build vArrIndentCounter
+			if ( !vArrIndentCounter[vIndentCounter] )
+				vArrIndentCounter.Push(1)
+			else
+				vArrIndentCounter[vIndentCounter] := vArrIndentCounter[vIndentCounter] + 1
+			
+			; Close lists not directly under the current one (say new line is indented one less than the previous line)
+			if ( vIndentCounter < vArrIndentCounter.MaxIndex() )
+			{
+				Loop % (vArrIndentCounter.MaxIndex() - vIndentCounter)
+					vArrIndentCounter.Pop()
+			}
+			
+			vPrefix := 
+			
+			; Loop through vArrIndentCounter to build prefix for indented lines
+			Loop % vArrIndentCounter.MaxIndex()
+				vPrefix := vPrefix . vArrIndentCounter[A_Index] . "."
+			
+			vResult .= NewLine RegExReplace(A_LoopField, "([^\s][\S].+)", (vPrefix . " $1") ) ; Put prefix after indentation
+			
+		}
+	}
+	
+	SB_SetText("Created indented level list - Ordinal Numbers")
+	return SubStr(vResult, StrLen(NewLine) + 1) ; Remove Newline at the beginning
+}
+
 ; -----------------------------------------------------------------------------------------------------------
 
 ; -----------------------------------------------------------------------------------------------------------
@@ -1412,24 +1499,22 @@ TextPrefixOrdinalLowercase(UserInput) {
 	NewLine := "`r`n"
 	Numeral := 97 ; Ordinal number listing starts with a
 	
-	Text := UserInput
+	vText := UserInput
 	
 	@ := ""
-	Loop, Parse, Text, `n, `r 
+	Loop, Parse, vText, `n, `r 
 	{
 		; First see if there is text. Then, prefix the text part only (for example, indented text)
 		MatchedPosition := RegExMatch(A_LoopField, "O)([\S].+)", RegExMatchOutputVar)
 		if ( RegExMatchOutputVar.Count() > 0 )
 		{	
 			OrdinalText := Chr(Numeral) . ". "
-			;@ .= NewLine Numeral ". " A_LoopField
 			@ .= NewLine
 			@ .= RegExReplace(A_LoopField, "([\S].+)", OrdinalText . "$1" )
 			Numeral += 1
 		}
 	}
-
-	;SetStatusMessageAndColor("Created list with lowercase letters.", "Green")
+	
 	SB_SetText("Created list with lowercase letters.")
 	return SubStr(@, StrLen(NewLine) + 1)
 }
@@ -1455,30 +1540,25 @@ TextPrefixOrdinalUppercase(UserInput) {
 	NewLine := "`r`n"
 	Numeral := 65 ; Ordinal number listing starts with a
 	
-	Text := UserInput
+	vText := UserInput
 	
-	;If ("" <> Text := Clip()) {
-		@ := ""
-		Loop, Parse, Text, `n, `r 
-		{
-			; First see if there is text. Then, prefix the text part only (for example, indented text)
-			MatchedPosition := RegExMatch(A_LoopField, "O)([\S].+)", RegExMatchOutputVar)
-			if ( RegExMatchOutputVar.Count() > 0 )
-			{	
-				OrdinalText := Chr(Numeral) . ". "
-				;@ .= NewLine Numeral ". " A_LoopField
-				@ .= NewLine
-				@ .= RegExReplace(A_LoopField, "([\S].+)", OrdinalText . "$1" )
-				Numeral += 1
-			}
-	    }
+	@ := ""
+	Loop, Parse, vText, `n, `r 
+	{
+		; First see if there is text. Then, prefix the text part only (for example, indented text)
+		MatchedPosition := RegExMatch(A_LoopField, "O)([\S].+)", RegExMatchOutputVar)
+		if ( RegExMatchOutputVar.Count() > 0 )
+		{	
+			OrdinalText := Chr(Numeral) . ". "
+			;@ .= NewLine Numeral ". " A_LoopField
+			@ .= NewLine
+			@ .= RegExReplace(A_LoopField, "([\S].+)", OrdinalText . "$1" )
+			Numeral += 1
+		}
+	}
 	
-		;Clip(SubStr(@, StrLen(NewLine) + 1), 2)
-		;Clip(@,2)
-		;SetStatusMessageAndColor("Created list with uppercase letters.", "Green")
-		SB_SetText("Created list with uppercase letters.")
-		return SubStr(@, StrLen(NewLine) + 1)
-	;}
+	SB_SetText("Created list with uppercase letters.")
+	return SubStr(@, StrLen(NewLine) + 1)
 }
 ; -----------------------------------------------------------------------------------------------------------
 
@@ -1486,7 +1566,6 @@ TextPrefixOrdinalUppercase(UserInput) {
 TextReplaceCharsNewLine(UserInput){
 
 	; Find/Replace with Regex: Allow user to enter a regular expression and replacement string
-	;vText := "The quick brown fox jumped over the lazy dog.`r`nThen, the dog jumped over the lazy fox."
 	vText := UserInput
 	
 	Prompt = "Enter character(s) to find/replace with new line"
@@ -1497,11 +1576,10 @@ TextReplaceCharsNewLine(UserInput){
 	
 	If ErrorLevel
 	{
-		MsgBox, "(TextReplaceRegex) There was an issue."
+		SB_SetText("(TextReplaceRegex) There was an issue.")
 		return
 	}
 	
-	;SetStatusMessageAndColor("Replaced text with new line.", "Green")
 	SB_SetText("Replaced text with new line.")
 	return vAltText
 }
@@ -1510,17 +1588,15 @@ TextReplaceCharsNewLine(UserInput){
 ; -----------------------------------------------------------------------------------------------------------
 HelperTextReplaceRegex(vText, vRegExSearch, vRegExReplace){ ; Modified
 	; Find/Replace with Regex: Allow user to enter a regular expression and replacement string
-	;vText := "The quick brown fox jumped over the lazy dog.`r`nThen, the dog jumped over the lazy fox."
 
 	if ( !vRegExReplace )
 		vRegExReplace := ""
 
 	vAltText := RegExReplace(vText, vRegExSearch, vRegExReplace)
-	;MsgBox % vText
-	;MsgBox % vAltText
+
 	If ErrorLevel
 	{
-		MsgBox, "(TextReplaceRegex) There was an issue."
+		SB_SetText("(TextReplaceRegex) There was an issue.")
 		return
 	}
 	
@@ -1530,7 +1606,6 @@ HelperTextReplaceRegex(vText, vRegExSearch, vRegExReplace){ ; Modified
 HelperTextReplaceRegexEachLine(vText, vRegExSearch, vRegExReplace){ ; Modified
 
 	; Find/Replace with Regex: Allow user to enter a regular expression and replacement string
-	;vText := "The quick brown fox jumped over the lazy dog.`r`nThen, the dog jumped over the lazy fox."
 
 	if ( !vRegExReplace )
 		vRegExReplace := ""
@@ -1542,19 +1617,36 @@ HelperTextReplaceRegexEachLine(vText, vRegExSearch, vRegExReplace){ ; Modified
 		@ .= NewLine RegExReplace(A_LoopField, vRegExSearch, vRegExReplace)
 		If ErrorLevel
 		{
-			MsgBox, "(TextReplaceRegexEachLine) There was an issue."
+			SB_SetText("(TextReplaceRegexEachLine) There was an issue.")
 			return
 		}
 	}
 	
 	return SubStr(@, StrLen(NewLine) + 1)
 }
-; END - Borrowed Functions from Smart Gui
+
+HelperTextReplaceStringReplaceEachLine(vText, vSearch, vReplace){ ; Modified
+
+	; Find/Replace with StringReplace (versus RegExReplace)
+
+	if ( !vReplace )
+		vReplace := ""
+
+	NewLine := "`r`n"
+	@ := ""
+	Loop, Parse, vText, `n, `r
+	{
+		vReplacedText := StrReplace(A_LoopField, vSearch, vReplace)
+		@ .= NewLine vReplacedText
+	}
+	
+	return SubStr(@, StrLen(NewLine) + 1)
+}
 
 TextReplaceRegex(UserInput){
 
 	; Find/Replace with Regex: Allow user to enter a regular expression and replacement string
-	;vText := "The quick brown fox jumped over the lazy dog.`r`nThen, the dog jumped over the lazy fox."
+	
 	vText := UserInput
 	Prompt = "Enter regular expression for find/replace"
 	InputBox, OutputVar, Enter Data for ..., %Prompt%, %HIDE%, %Width%, %Height%, %X%, %Y%, , %Timeout%, %Dft%
@@ -1570,15 +1662,13 @@ TextReplaceRegex(UserInput){
 		vUserReplacement := ""
 
 	vAltText := RegExReplace(vText, vUserRegex, vUserReplacement)
-	;MsgBox % vText
-	;MsgBox % vAltText
+	
 	If ErrorLevel
 	{
-		MsgBox, "(TextReplaceRegex) There was an issue."
+		SB_SetText("(TextReplaceRegex) There was an issue.")
 		return
 	}
 	
-	;SetStatusMessageAndColor("Replaced text with string (RegEx).", "Green")
 	SB_SetText("Replaced text with string (RegEx).")
 	return vAltText
 }
@@ -1586,7 +1676,7 @@ TextReplaceRegex(UserInput){
 TextReplaceRegexEachLine(UserInput){
 
 	; Find/Replace with Regex: Allow user to enter a regular expression and replacement string
-	;vText := "The quick brown fox jumped over the lazy dog.`r`nThen, the dog jumped over the lazy fox."
+	
 	vText := UserInput
 	Prompt = "Enter regular expression for find/replace"
 	InputBox, OutputVar, Enter Data for ..., %Prompt%, %HIDE%, %Width%, %Height%, %X%, %Y%, , %Timeout%, %Dft%
@@ -1601,29 +1691,60 @@ TextReplaceRegexEachLine(UserInput){
 	if ( !vUserReplacement )
 		vUserReplacement := ""
 
-	/*
-	NewLine := "`r`n"
-	Text := UserInput
-	
-	@ := ""
-	Loop, Parse, Text, `n, `r
-	{
-		@ .= NewLine RegExReplace(A_LoopField, vUserRegex, vUserReplacement)
-		If ErrorLevel
-		{
-			;MsgBox, "(TextReplaceRegexEachLine) There was an issue."
-			SetStatusMessageAndColor("There was an issue with the entered Regular Expression.", "Red")
-			return
-		}
-	}
-	
-	SetStatusMessageAndColor("Replaced text on each line (RegEx).", "Green")
-	return SubStr(@, StrLen(NewLine) + 1)
-	*/
 	SB_SetText("Replaced text on each line (RegEx).")
 	return HelperTextReplaceRegexEachLine(vText, vUserRegex, vUserReplacement)
 }
 
+TextReplaceStringReplace(UserInput){
+	; Find/Replace with StringReplace
+	vText := UserInput
+	Prompt = "Enter search text for find/replace"
+	InputBox, OutputVar, Enter Data for ..., %Prompt%, %HIDE%, %Width%, %Height%, %X%, %Y%, , %Timeout%, %Dft%
+	vUserSearch := OutputVar
+	
+	if (!vUserSearch){
+		SB_SetText("User did not enter text to search input for.")
+		return ; Cannot replace if search criteria is not defined.
+	}
+
+	; replace double quotes with "\x22"
+
+	Prompt = "Enter replacement text for find/replace"
+	InputBox, OutputVar, Enter Data for ..., %Prompt%, %HIDE%, %Width%, %Height%, %X%, %Y%, , %Timeout%, %Dft%
+	vUserReplacement := OutputVar
+
+	if ( !vUserReplacement )
+		vUserReplacement := ""
+	
+	vAltText := StrReplace(vText, vUserSearch, vUserReplacement)
+	
+	SB_SetText("Replaced all occurrences of search text with replacement text (StringReplace).")
+	return vAltText
+}
+
+TextReplaceStringReplaceEachLine(UserInput){
+	; Replace 'search text' with 'replacement text'
+	vText := UserInput
+	Prompt = "Enter text for find/replace"
+	InputBox, OutputVar, Enter Data for ..., %Prompt%, %HIDE%, %Width%, %Height%, %X%, %Y%, , %Timeout%, %Dft%
+	vUserSearch := OutputVar
+
+	if (!vUserSearch){
+		SB_SetText("User did not enter text to search input for.")
+		return ; Cannot replace if search criteria is not defined.
+	}
+	
+	; replace double quotes with "\x22"
+	Prompt = "Enter replacement string for find/replace"
+	InputBox, OutputVar, Enter Data for ..., %Prompt%, %HIDE%, %Width%, %Height%, %X%, %Y%, , %Timeout%, %Dft%
+	vUserReplacement := OutputVar
+
+	if ( !vUserReplacement )
+		vUserReplacement := ""
+
+	SB_SetText("Replaced text on each line (StringReplace).")
+	return HelperTextReplaceStringReplaceEachLine(vText, vUserSearch, vUserReplacement) ; (vText, vSearch, vReplace)
+}
 
 TextReplaceStringXTimes(UserInput){
 	
@@ -1652,11 +1773,12 @@ TextReplaceStringXTimes(UserInput){
 
 	If ErrorLevel
 	{
-		MsgBox, "(TextReplaceStringXTimes) There was an issue."
+		SB_SetText("(TextReplaceStringXTimes) There was an issue.")
 		return
 	}
+	
 	vStatusText := "String replaced " vUserNumber " time(s)."
-	;SetStatusMessageAndColor(vStatusText, "Green")
+	
 	SB_SetText(vStatusText)
 	return vAltText
 }
@@ -1695,25 +1817,12 @@ CallbackReplaceFirstOccurrence(vText, vParams*)
 	vFind := vParams[1]
 	vReplace := vParams[2]
 	
-	/*
-	vFoundPos := InStr(vText, vFind,0,0) ; Find last occurrence ; Return 0 if not found
-	
-	if ( vFoundPos )
-		return RegExReplace(vText, vFind, vReplace, 0, 1, vFoundPos) ; 
-	else
-		return vText
-	*/
-	
 	return RegExReplace(vText, vFind, vReplace,,1) ; Replaces the first occurrence as "limit" is set to 1
 }
 
 TextReplaceLastStringOccurrenceEachLine(UserInput)
 {
 	; Replace last occurrence in a string - Using variadic variables and callback functions
-	;vText := "RUN RUN RUN GOT YOU!`nRUN RUN RUN GOT YOU!`nRUN RUN RUN GOT YOU!"
-	;vFind := "RUN"
-	;vReplace := "WALK"
-	
 	vText := UserInput
 	
 	Prompt = "What do you want to replace?"
@@ -1728,7 +1837,7 @@ TextReplaceLastStringOccurrenceEachLine(UserInput)
 	vReplace := OutputVar
 	
 	vResult := HelperLoopEachLineCallFunction(vText, "CallbackReplaceLastOccurrence", vFind, vReplace)
-	;SetStatusMessageAndColor("Replaced last occurrence (Each Line).", "Green")
+	
 	SB_SetText("Replaced last occurrence (Each Line).")
 	return vResult
 }
@@ -1736,7 +1845,6 @@ TextReplaceLastStringOccurrenceEachLine(UserInput)
 TextReplaceFirstStringOccurrenceEachLine(UserInput)
 {
 	; Replace last occurrence in a string - Using variadic variables and callback functions
-	
 	vText := UserInput
 	
 	Prompt = "What do you want to replace?"
@@ -1751,7 +1859,7 @@ TextReplaceFirstStringOccurrenceEachLine(UserInput)
 	vReplace := OutputVar
 	
 	vResult := HelperLoopEachLineCallFunction(vText, "CallbackReplaceFirstOccurrence", vFind, vReplace)
-	;SetStatusMessageAndColor("Replaced first occurrence (Each Line).", "Green")
+	
 	SB_SetText("Replaced first occurrence (Each Line).")
 	return vResult
 }
@@ -1775,11 +1883,10 @@ TextReplaceLastStringOccurrence(UserInput)
 	vFoundPos := InStr(vText, vFind,0,0) ; Find last occurrence ; Return 0 if not found
 	
 	if ( vFoundPos ) {
-		;SetStatusMessageAndColor("Replaced last occurrence.", "Green")
 		SB_SetText("Replaced last occurrence.")
 		return RegExReplace(vText, vFind, vReplace, 0, 1, vFoundPos) ; 
+		
 	} else {
-		;SetStatusMessageAndColor("Could not find text.", "Green")
 		SB_SetText("Could not find text.")
 		return vText
 	}
@@ -1794,22 +1901,15 @@ TextReplaceFirstStringOccurrence(UserInput)
 	InputBox, OutputVar, Find/Replace String X Times..., %Prompt%, %HIDE%, %Width%, %Height%, %X%, %Y%, , %Timeout%, %Dft%
 	vFind := OutputVar
 	
-	if ( StrLen(vFind) == 0 )
+	if ( StrLen(vFind) == 0 ) {
+		SB_SetText("Nothing entered to replace. Stopped.")
 		return
+	}
 	
 	Prompt = "What do you want to replace it with?"
 	InputBox, OutputVar, Find/Replace String X Times..., %Prompt%, %HIDE%, %Width%, %Height%, %X%, %Y%, , %Timeout%, %Dft%
 	vReplace := OutputVar
 	
-	/*
-	vFoundPos := InStr(vText, vFind,0,0) ; Find last occurrence ; Return 0 if not found
-	
-	if ( vFoundPos )
-		return RegExReplace(vText, vFind, vReplace, 0, 1, vFoundPos) ; 
-	else
-		return vText
-	*/
-	;SetStatusMessageAndColor("Replaced first occurrence.", "Green")
 	SB_SetText("Replaced first occurrence.")
 	return RegExReplace(vText, vFind, vReplace,,1)
 }
@@ -1818,15 +1918,12 @@ TextReplaceFirstStringOccurrence(UserInput)
 TextTrim(UserInput) {
 
 	NewLine := "`r`n"
-	Text := UserInput
+	vText := UserInput
 	
 	@ := ""
-	Loop, Parse, Text, `n, `r
-	{
-		@ .= NewLine Text := Trim(A_LoopField)
-	}
+	Loop, Parse, vText, `n, `r
+		@ .= NewLine vText := Trim(A_LoopField)
 	
-	;SetStatusMessageAndColor("Trimmed text.", "Green")
 	SB_SetText("Trimmed text.")
 	return SubStr(@, StrLen(NewLine) + 1)
 }
@@ -1834,15 +1931,12 @@ TextTrim(UserInput) {
 TextTrimLeft(UserInput) {
 
 	NewLine := "`r`n"
-	Text := UserInput
+	vText := UserInput
 	
 	@ := ""
-	Loop, Parse, Text, `n, `r
-	{
-		@ .= NewLine Text := LTrim(A_LoopField)
-	}
+	Loop, Parse, vText, `n, `r
+		@ .= NewLine vText := LTrim(A_LoopField)
 	
-	;SetStatusMessageAndColor("Trimmed left of Text.", "Green")
 	SB_SetText("Trimmed left of Text.")
 	return SubStr(@, StrLen(NewLine) + 1)
 }
@@ -1850,81 +1944,62 @@ TextTrimLeft(UserInput) {
 TextTrimRight(UserInput) {
 
 	NewLine := "`r`n"
-	Text := UserInput
+	vText := UserInput
 	
 	@ := ""
-	Loop, Parse, Text, `n, `r
-	{
-		@ .= NewLine Text := RTrim(A_LoopField)
-	}
+	Loop, Parse, vText, `n, `r
+		@ .= NewLine vText := RTrim(A_LoopField)
 	
-	;SetStatusMessageAndColor("Trimmed right of Text.", "Green")
 	SB_SetText("Trimmed right of Text.")
 	return SubStr(@, StrLen(NewLine) + 1)
 }
 
 TextRemoveSpaces(UserInput) {
 	NewLine := "`r`n"
-	Text := UserInput
+	vText := UserInput
 	
-	;If ("" <> Text := Clip()) {
-		@ := ""
-		Loop, Parse, Text, `n, `r
-		{
-			@ .= NewLine Text := RegExReplace(A_LoopField, " ", "")
-		}
-		
-		;Clip(SubStr(@, StrLen(NewLine) + 1), 2)
-		;SetStatusMessageAndColor("Removed spaces.", "Green")
-		SB_SetText("Removed spaces.")
-		return SubStr(@, StrLen(NewLine) + 1)
-	;}
+	@ := ""
+	Loop, Parse, vText, `n, `r
+		@ .= NewLine vText := RegExReplace(A_LoopField, " ", "")
+	
+	SB_SetText("Removed spaces.")
+	return SubStr(@, StrLen(NewLine) + 1)
 }
 
 TextReplaceSpacesUnderscore(UserInput) {
 	NewLine := "`r`n"
-	Text := UserInput
+	vText := UserInput
 	
-	;If ("" <> Text := Clip()) {
-		@ := ""
-		Loop, Parse, Text, `n, `r
-		{
-			@ .= NewLine Text := RegExReplace(A_LoopField, " ", "_")
-		}
-		
-		;Clip(SubStr(@, StrLen(NewLine) + 1), 2)
-		;SetStatusMessageAndColor("Replaced spaces with underscores.", "Green")
-		SB_SetText("Replaced spaces with underscores.")
-		return SubStr(@, StrLen(NewLine) + 1)
-	;}
+	@ := ""
+	Loop, Parse, vText, `n, `r
+		@ .= NewLine vText := RegExReplace(A_LoopField, " ", "_")
+	
+	SB_SetText("Replaced spaces with underscores.")
+	return SubStr(@, StrLen(NewLine) + 1)
 }
 
 TextReplaceSpacesDash(UserInput) {
 	NewLine := "`r`n"
-	Text := UserInput
+	vText := UserInput	
+	@ := ""
 	
-	;If ("" <> Text := Clip()) {
-		@ := ""
-		Loop, Parse, Text, `n, `r
-		{
-			@ .= NewLine Text := RegExReplace(A_LoopField, " ", "-")
-		}
-		
-		;Clip(SubStr(@, StrLen(NewLine) + 1), 2)
-		;SetStatusMessageAndColor("Replaced spaces with dashes.", "Green")
-		SB_SetText("Replaced spaces with dashes.")
-		return SubStr(@, StrLen(NewLine) + 1)
-	;}
+	Loop, Parse, vText, `n, `r
+	{
+		@ .= NewLine vText := RegExReplace(A_LoopField, " ", "-")
+	}
+	
+	SB_SetText("Replaced spaces with dashes.")
+	return SubStr(@, StrLen(NewLine) + 1)
 }
 
 RemoveBlankLines(UserInput)
 {	
 	vText := UserInput
-    
-    ; Reduce double CRLF (`r`n`r`n)
+	
+	; Reduce double CRLF (`r`n`r`n)
 	Loop
 	{
-        ; When the last parameter is UseErrorLevel, ErrorLevel is given the number occurrences replaced (0 if none).
+		; When the last parameter is UseErrorLevel, ErrorLevel is given the number occurrences replaced (0 if none).
 		; Otherwise, ErrorLevel is set to 1 if SearchText is not found within InputVar, or 0 if it is found.
 		;StringReplace, vText, vText, `r`n`r`n, `r`n, UseErrorLevel
 		;if (ErrorLevel = 0)  ; No more replacements needed.
@@ -1935,14 +2010,14 @@ RemoveBlankLines(UserInput)
 			break
 	}
 	
-    ; Reduce double LF (`n`n)
+	; Reduce double LF (`n`n)
 	Loop
 	{
 		StringReplace, vText, vText, `n`n, `n, All
 		if (ErrorLevel = 1)
 			break
 	}
-    
+	
 	SB_SetText("Removed blank lines.")
 	return vText
 }
@@ -1953,7 +2028,6 @@ RemoveDuplicateLines(UserInput)
 	trimmedArray := HelperTrimArray(arrLines)
 	joinLines := Join(trimmedArray, "`n")
 	
-	;SetStatusMessageAndColor("Removed duplicate lines.", "Green")
 	SB_SetText("Removed duplicate lines.")
 	return SubStr(joinLines, 1, StrLen(joinLines) - StrLen("`n") + 1)
 }
@@ -1967,25 +2041,23 @@ HelperTrimArray(arr) { ; Hash O(n)
         if (!hash.Haskey(v))
             hash[(v)] := 1, newArr.push(v)
 
-	;SetStatusMessageAndColor("Done.", "Green")
     return newArr
 }
 
 RemoveRepeatingDuplicateLines(UserInput)
 {
-	Text := UserInput . "`n"
+	vText := UserInput . "`n"
 	
-	Loop, Parse, Text, `n, `r
+	Loop, Parse, vText, `n, `r
 	{
 		delim := A_LoopField . "`n"
-		Text := st_removeDuplicates(Text, delim)
+		vText := st_removeDuplicates(vText, delim)
 	}
 	
 	TextMinusDelim := StrLen(Text) - StrLen("`n")
 	
-	;SetStatusMessageAndColor("Removed repeating lines.", "Green")
 	SB_SetText("Removed repeating lines.")
-	return SubStr(Text, 1, TextMinusDelim)
+	return SubStr(vText, 1, TextMinusDelim)
 }
 
 RemoveRepeatingDuplicateChars(UserInput)
@@ -1996,11 +2068,10 @@ RemoveRepeatingDuplicateChars(UserInput)
 	if (StrLen(OutputVar) == 0)
 		return
 	
-	Text := UserInput
+	vText := UserInput
 	
-	;SetStatusMessageAndColor("Removed repeating characters.", "Green")
 	SB_SetText("Removed repeating characters.")
-	return st_removeDuplicates(Text, OutputVar)
+	return st_removeDuplicates(vText, OutputVar)
 }
 
 HelperRemoveLinesIncludeExcludeText(vText, vNeedle, vChoice)
@@ -2021,7 +2092,6 @@ HelperRemoveLinesIncludeExcludeText(vText, vNeedle, vChoice)
 	@ :=
 	Loop, Parse, vText, `n, `r
 	{
-		
 		if (vChoice == 1){ ; Skip if line includes text
 			If InStr(A_LoopField, vNeedle)
 				continue
@@ -2044,16 +2114,12 @@ RemoveLinesThatIncludeText(UserInput)
 	Prompt = "Remove text lines that include what characters?"
 	InputBox, OutputVar, Enter Data for ..., %Prompt%, %HIDE%, %Width%, %Height%, %X%, %Y%, , %Timeout%, %Dft%
 	
-	if ( StrLen(OutputVar) == 0 )
-	{
-		;SetStatusMessageAndColor("Character(s) input cannot be nothing.", "Red")
+	if ( StrLen(OutputVar) == 0 ) {
 		SB_SetText("Character(s) input cannot be nothing.")
 		return
 	}
 	
-	if ( InStr(UserInput, OutputVar) == false )
-	{
-		;SetStatusMessageAndColor("Character(s) should be in string.", "Red")
+	if ( InStr(UserInput, OutputVar) == false ) {
 		SB_SetText("Character(s) should be in string.")
 		return
 	}
@@ -2064,15 +2130,10 @@ RemoveLinesThatIncludeText(UserInput)
 	vResult := HelperRemoveLinesIncludeExcludeText(vText, vNeedle, vChoice)
 	
 	if ( StrLen(vResult) == 0 )
-	{
-		;SetStatusMessageAndColor("All lines included the text.", "Green")
 		SB_SetText("All lines included the text.")
-	}
 	else
-	{
-		;SetStatusMessageAndColor("Removed lines that included the text.", "Green")
 		SB_SetText("Removed lines that included the text.")
-	}
+
 	return vResult
 }
 
@@ -2083,7 +2144,6 @@ RemoveLinesThatExcludeText(UserInput)
 	
 	if ( StrLen(OutputVar) == 0 )
 	{
-		;SetStatusMessageAndColor("Character(s) input cannot be nothing.", "Red")
 		SB_SetText("Character(s) input cannot be nothing.")
 		return
 	}
@@ -2094,15 +2154,9 @@ RemoveLinesThatExcludeText(UserInput)
 	vResult := HelperRemoveLinesIncludeExcludeText(vText, vNeedle, vChoice)
 	
 	if ( StrLen(vResult) == 0 )
-	{
-		;SetStatusMessageAndColor("All lines excluded the text.", "Green")
 		SB_SetText("All lines excluded the text.")
-	}
 	else
-	{
-		;SetStatusMessageAndColor("Removed lines that excluded the text.", "Green")
 		SB_SetText("Removed lines that excluded the text.")
-	}
 	
 	return vResult
 }
@@ -2150,7 +2204,6 @@ RemoveLinesThatMatchRegEx(UserInput)
 	
 	if ( StrLen(OutputVar) == 0 )
 	{
-		;SetStatusMessageAndColor("Regular Expression input cannot be nothing.", "Red")
 		SB_SetText("Regular Expression input cannot be nothing.")
 		return
 	}
@@ -2161,15 +2214,9 @@ RemoveLinesThatMatchRegEx(UserInput)
 	vResult := HelperRemoveLinesMatchDontMatchRegEx(vText, vNeedle, vChoice)
 	
 	if ( StrLen(vResult) == 0 )
-	{
-		;SetStatusMessageAndColor("All lines matched the regular expression.", "Green")
 		SB_SetText("All lines matched the regular expression.")
-	}
 	else
-	{
-		;SetStatusMessageAndColor("Removed lines that matched RegEx.", "Green")
 		SB_SetText("Removed lines that matched RegEx.")
-	}
 	
 	return vResult
 }
@@ -2181,7 +2228,6 @@ RemoveLinesThatDontMatchRegEx(UserInput)
 	
 	if ( StrLen(OutputVar) == 0 )
 	{
-		;SetStatusMessageAndColor("Regular Expression input cannot be nothing.", "Red")
 		SB_SetText("Regular Expression input cannot be nothing.")
 		return
 	}
@@ -2192,20 +2238,32 @@ RemoveLinesThatDontMatchRegEx(UserInput)
 	vResult := HelperRemoveLinesMatchDontMatchRegEx(vText, vNeedle, vChoice)
 	
 	if ( StrLen(vResult) == 0 )
-	{
-		;SetStatusMessageAndColor("All lines didn't match the regular expression.", "Green")
 		SB_SetText("All lines didn't match the regular expression.")
-	}
 	else
-	{
-		;SetStatusMessageAndColor("Removed lines that don't match RegEx.", "Green")
 		SB_SetText("Removed lines that don't match RegEx.")
-	}
 	
 	return vResult
 }
 
-;; ---------------
+RemoveWhitespace(UserInput)
+{
+	; User should use Join w/ Char to put spaces in between. And Reduce Whitespace for that.
+	vText := UserInput
+	vText := Trim(vText)
+	vText := RegExReplace(vText, "\s", " ") ; Convert any whitespace char (space, tab, newline)
+	vText := RegExReplace(vText, "\s+", " ") ; Converts grouped spaces (1 or more)
+	
+	return vText
+}
+
+RemoveWhitespaceEachLine(UserInput)
+{
+	vText := UserInput
+	vCallBack := "RemoveWhitespace"
+	vResult := HelperLoopEachLineCallFunction(vText, vCallBack, "")
+	
+	return vResult
+}
 
 /*
 String Things - Common String & Array Functions by Tidbit
@@ -2267,13 +2325,13 @@ TextPadSpaceLeft(UserInput)
 		
 	if OutputVar is not integer
 	{ 
-		;SetStatusMessageAndColor("Invalid value for pad length.", "Red")
+		
 		SB_SetText("Invalid value for pad length.")
 		return
 	}
 	
 	vText := HelperPadSpacesLeftOrRight(OutputVar, UserInput, "Left")
-	;SetStatusMessageAndColor("Padded with spaces (Left).", "Green")
+	
 	SB_SetText("Padded with spaces (Left).")
 	return vText
 }
@@ -2290,7 +2348,7 @@ TextPadSpaceRight(UserInput)
 	InputBox, OutputVar, Enter Data for ..., %Prompt%, %HIDE%, %Width%, %Height%, %X%, %Y%, , %Timeout%, %Dft%
 	
 	vText := HelperPadSpacesLeftOrRight(OutputVar, UserInput, "Right")
-	;SetStatusMessageAndColor("Padded with spaces (Right).", "Green")
+	
 	SB_SetText("Padded with spaces (Right).")
 	return vText
 }
@@ -2321,14 +2379,14 @@ TextPadLeftCharLineUp(UserInput)
 	
 	if ( StrLen(OutputVar) == 0 )
 	{
-		;SetStatusMessageAndColor("Character(s) input cannot be nothing.", "Red")
+		
 		SB_SetText("Character(s) input cannot be nothing.")
 		return
 	}
 	
 	if ( InStr(UserInput, OutputVar) == false )
 	{
-		;SetStatusMessageAndColor("Character(s) should be in string.", "Red")
+		
 		SB_SetText("Character(s) should be in string.")
 		return
 	}
@@ -2339,11 +2397,10 @@ TextPadLeftCharLineUp(UserInput)
 	
 	if (vMaxChar == 0 )
 	{
-		;SetStatusMessageAndColor("MaxChar is 0; No need to process or bug.", "Red")
+		
 		SB_SetText("MaxChar is 0; No need to process or bug.")
 		return
 	}
-	
 	
 	NewLine := "`r`n"
 	@ := ""
@@ -2366,8 +2423,6 @@ TextPadLeftCharLineUp(UserInput)
 			@ .= NewLine A_LoopField
 	}
 	
-	;Clip(SubStr(@, StrLen(NewLine) + 1), 2)
-	;SetStatusMessageAndColor("Padded lines to align text to character.", "Green")
 	SB_SetText("Padded lines to align text to character.")
 	return SubStr(@, StrLen(NewLine) + 1)
 }
@@ -2405,11 +2460,11 @@ HelperTextCharLineUp(vText, vFindChar)
 				{
 					PaddedSpace .= A_Space
 				}
-				@ .= NewLine Text := PaddedSpace . A_LoopField
+				@ .= NewLine PaddedSpace A_LoopField
 			}
 			else
 			{
-				@ .= NewLine Text := A_LoopField
+				@ .= NewLine A_LoopField
 			}
 		}
 		
@@ -2437,83 +2492,23 @@ TextCharLineUp(UserInput) {
 	vText := UserInput
 	
 	return HelperTextCharLineUp(vText, vFindChar)
-	
-	/*
-	;If ("" <> Text := Clip()) 
-	;{
-		
-		NewLine := "`r`n"
-		MaxChar := 0
-		
-		; Loop to determine the line with the most amount of characters before special character (Item1: Fun = 5 characters before ":")
-		Loop, Parse, Text, `n, `r
-		{
-			; Returns the position of an occurrence of the string Needle in the string Haystack.
-			; Position 1 is the first character; this is because 0 is synonymous with "false", making it an intuitive "not found" indicator.
-			FoundPos := InStr(A_LoopField, FindChar)
-			
-			; Compare to our placeholder variable for spacing, MaxChar
-			; Only overwrite MaxChar if the newly found position is greater than our previously found, and furthest found, position
-			If ( FoundPos <> 0 and FoundPos > MaxChar)
-				MaxChar := FoundPos
-		}
-		
-		If ( MaxChar > 0 )
-		{
-			; Loop again to precede line with spaces until all lines match (line 1 has 5 characters/spaces before ":" and so done line 2, 3, 4, etc.)
-			@ := ""
-			Loop, Parse, Text, `n, `r
-			{
-				; If less than desired length, pad with spaces
-				PaddedSpace :=
-				if ( InStr(A_LoopField, ":") < MaxChar )
-				{
-					PlaceDiff := MaxChar - InStr(A_LoopField, FindChar)
-					Loop, %PlaceDiff%
-					{
-						PaddedSpace .= A_Space
-					}
-					;stdout.WriteLine(PaddedSpace . A_LoopField)
-					@ .= NewLine Text := PaddedSpace . A_LoopField
-				}
-				else
-				{
-					;stdout.WriteLine(A_LoopField)
-					@ .= NewLine Text := A_LoopField
-				}
-			}
-			
-			;Clip(SubStr(@, StrLen(NewLine) + 1), 2)
-			;SetStatusMessageAndColor("Padded text to align to character.", "Green")
-			SB_SetText("Padded text to align to character.")
-			return SubStr(@, StrLen(NewLine) + 1)
-		}
-	;}
-	*/
 }
 
 TextSay(UserInput)
 {
-	Text := UserInput
-	
-	;if ("" <> Text := Clip()) {
+	vText := UserInput
 
-		Length := StrLen(Text)
+	Length := StrLen(vText)
+	
+	if ( Length > 0 ) {
 		
-		if ( Length > 0 ) {
-			
-			AnnaVoice := TTS_CreateVoice("Microsoft Anna")
-			TTS(AnnaVoice, "SpeakWait", Text)
-			;SetStatusMessageAndColor("Text spoken.", "Green")
-			SB_SetText("Text spoken.")
-		}
-		else {
-			;MsgBox,,"Text.ahk",No text available in the clipboard to say
-			;SetStatusMessageAndColor("No text available in the clipboard to say","Red")
-			SB_SetText("No text available in the clipboard to say")
-		}
-	;}
-;return	
+		AnnaVoice := TTS_CreateVoice("Microsoft Anna")
+		TTS(AnnaVoice, "SpeakWait", vText)
+		
+		SB_SetText("Text spoken.")
+	}
+	else
+		SB_SetText("No text available in the clipboard to say")
 }
 
 TextSayStop(UserInput){
@@ -2523,139 +2518,105 @@ TextSayStop(UserInput){
 
 TextSurroundingChar(UserInput) {
 
-	Text := UserInput
-
-	;If ("" <> Text := Clip()) {
-
-		Prompt = "Enter left-side surrounding Char"
-		InputBox, OutputVar, Enter Data for ..., %Prompt%, %HIDE%, %Width%, %Height%, %X%, %Y%, , %Timeout%, %Dft%
+	vText := UserInput
+	Prompt = "Enter left-side surrounding Char"
+	InputBox, OutputVar, Enter Data for ..., %Prompt%, %HIDE%, %Width%, %Height%, %X%, %Y%, , %Timeout%, %Dft%
+	
+	Length := StrLen(OutputVar)
+	
+	if ( Length > 0 ) {
 		
-		Length := StrLen(OutputVar)
+		if ( OutputVar == "[" )
+			Ending = ] ; Left/Right Square Bracket
+		else if ( OutputVar == "<" )
+			Ending = > ; Left/Right Angle Bracket
+		else if ( OutputVar == "{" )
+			Ending = } ; Left/Right Curly Bracket
+		else if ( OutputVar == "(" )
+			Ending = ) ; Left/Right Parenthesis
+		else if ( OutputVar == "`" )
+			Ending = ' ; Backtick, Apostrophe
+		else if ( OutputVar == "/*" )
+			Ending = */ ; Multi-line comment open/close (AHK, CSS, JavaScript)
+		else
+			Ending = %OutputVar% ; Default - same char on both sides
 		
-		if ( Length > 0 ) {
-			
-			if ( OutputVar == "[" )
-				Ending = ] ; Left/Right Square Bracket
-			else if ( OutputVar == "<" )
-				Ending = > ; Left/Right Angle Bracket
-			else if ( OutputVar == "{" )
-				Ending = } ; Left/Right Curly Bracket
-			else if ( OutputVar == "(" )
-				Ending = ) ; Left/Right Parenthesis
-			else if ( OutputVar == "`" )
-				Ending = ' ; Backtick, Apostrophe
-			else if ( OutputVar == "/*" )
-				Ending = */ ; Multi-line comment open/close (AHK, CSS, JavaScript)
-			else
-				Ending = %OutputVar% ; Default - same char on both sides
-			
-			;Send %OutputVar%%Text%%Ending%
-			;Clip(OutputVar . Text . Ending)
-			;SetStatusMessageAndColor("Surrounded Text with character.", "Green")
-			SB_SetText("Surrounded Text with character.")
-			return OutputVar . Text . Ending
-		}
-	;}
+		;Send %OutputVar%%vText%%Ending%
+		;Clip(OutputVar . vText . Ending)
+		
+		SB_SetText("Surrounded Text with character.")
+		return OutputVar . vText . Ending
+	}
 }
 
 TextPrefixSuffixRemoveEachLine(UserInput) {
 	; Wrap the text with a open/close HTML tag
 
-	Text := UserInput
+	vText := UserInput
 
-	;If ("" <> Text := Clip())
-	;{
-	;Text := Clipboard
+	Prompt = "Enter prefix text to remove from each line"
+	InputBox, OutputVar, Enter Data for ..., %Prompt%, %HIDE%, %Width%, %Height%, %X%, %Y%, , %Timeout%, %Dft%
+	Prefix := OutputVar
+	
+	Prompt = "Enter suffix text to remove from each line"
+	InputBox, OutputVar, Enter Data for ..., %Prompt%, %HIDE%, %Width%, %Height%, %X%, %Y%, , %Timeout%, %Dft%
+	Suffix := OutputVar
 
-		Prompt = "Enter prefix text to remove from each line"
-		InputBox, OutputVar, Enter Data for ..., %Prompt%, %HIDE%, %Width%, %Height%, %X%, %Y%, , %Timeout%, %Dft%
-		Prefix := OutputVar
+	if ( (StrLen(Prefix) == 0) and (StrLen(Suffix) == 0) )
+	{
+		SB_SetText("No data entered for Prefix or Suffix.")
+		return
+	}
+	
+	doPrefix := false
+	doSuffix := false
+	
+	if ( StrLen(Prefix) > 0 )
+		doPrefix := true
+	
+	if ( StrLen(Suffix) > 0 )
+		doSuffix := true
 		
-		Prompt = "Enter suffix text to remove from each line"
-		InputBox, OutputVar, Enter Data for ..., %Prompt%, %HIDE%, %Width%, %Height%, %X%, %Y%, , %Timeout%, %Dft%
-		Suffix := OutputVar
-
-		if ( (StrLen(Prefix) == 0) and (StrLen(Suffix) == 0) )
-		{
-			;MsgBox % "No data has been entered for Prefix or Suffix. Aborting."
-			;SetStatusMessageAndColor("No data entered for Prefix or Suffix.","Red")
-			SB_SetText("No data entered for Prefix or Suffix.")
-			return
-		}
-		
-		doPrefix := false
-		doSuffix := false
-		
-		if ( StrLen(Prefix) > 0 )
-			doPrefix := true
-		
-		if ( StrLen(Suffix) > 0 )
-			doSuffix := true
-			
-		NewLine := "`r`n"
-		@ := 
-		
-		Loop, Parse, Text, `n, `r
-		{
-			; Only surround text, not any indenting non-whitespace characters
-			@ .= NewLine
-			@ .= RegExReplace(A_LoopField, "(" . Prefix . "([\S].+)" . Suffix . ")", "$2" )
-		}
-		
-		;MsgBox % @
-		;Clip(@)
-		retValue := SubStr(@, StrLen(NewLine) +1) ; Remove last new line (`r`n) or blank line
-		;SetStatusMessageAndColor("Removed Prefix/Suffix (Text/RegEx).", "Green")
-		SB_SetText("Removed Prefix/Suffix (Text/RegEx).")
-		return retValue
-	;}
+	NewLine := "`r`n"
+	@ := 
+	
+	Loop, Parse, vText, `n, `r
+	{
+		; Only surround text, not any indenting non-whitespace characters
+		@ .= NewLine
+		@ .= RegExReplace(A_LoopField, "(" . Prefix . "([\S].+)" . Suffix . ")", "$2" )
+	}
+	
+	retValue := SubStr(@, StrLen(NewLine) +1) ; Remove last new line (`r`n) or blank line
+	
+	SB_SetText("Removed Prefix/Suffix (Text/RegEx).")
+	return retValue
 }
 
 TextPrefixSuffixEachLine(UserInput){
-
-	Text := UserInput
 	
-	;If ("" <> Text := Clip()) {
-	;Text := Clipboard
+	vText := UserInput	
 
-		Prompt = "Enter text to prefix each line"
-		InputBox, OutputVar, Enter Data for ..., %Prompt%, %HIDE%, %Width%, %Height%, %X%, %Y%, , %Timeout%, %Dft%
-		Prefix := OutputVar
-		
-		Prompt = "Enter text to suffix each line"
-		InputBox, OutputVar, Enter Data for ..., %Prompt%, %HIDE%, %Width%, %Height%, %X%, %Y%, , %Timeout%, %Dft%
-		Suffix := OutputVar
+	Prompt = "Enter text to prefix each line"
+	InputBox, OutputVar, Enter Data for ..., %Prompt%, %HIDE%, %Width%, %Height%, %X%, %Y%, , %Timeout%, %Dft%
+	Prefix := OutputVar
+	
+	Prompt = "Enter text to suffix each line"
+	InputBox, OutputVar, Enter Data for ..., %Prompt%, %HIDE%, %Width%, %Height%, %X%, %Y%, , %Timeout%, %Dft%
+	Suffix := OutputVar
 
-		if ( (StrLen(Prefix) == 0) and (StrLen(Suffix) == 0) )
-		{
-			;MsgBox % "No data has been entered for Prefix or Suffix. Aborting."
-			;SetStatusMessageAndColor("No data entered for Prefix or Suffix.","Red")
-			SB_SetText("No data entered for Prefix or Suffix.")
-			return
-		}
+	if ( (StrLen(Prefix) == 0) and (StrLen(Suffix) == 0) )
+	{
+		;MsgBox % "No data has been entered for Prefix or Suffix. Aborting."
 		
-		if ( (StrLen(Prefix) > 0) or (StrLen(Suffix) > 0) ) {
-			/*
-			NewLine := "`r`n"
-			@ := 
-			
-			Loop, Parse, Text, `n, `r
-			{
-				; Only surround text, not any indenting non-whitespace characters
-				@ .= NewLine
-				@ .= RegExReplace(A_LoopField, "([^\s][\S].+)", (Prefix . "$1" . Suffix) )
-			}
-			
-			;Clip(@)
-			retValue := SubStr(@, StrLen(NewLine) + 1) ; Remove last new line (`r`n) or blank line
-			;SetStatusMessageAndColor("Added Prefix/Suffix.", "Green")
-			SB_SetText("Added Prefix/Suffix.")
-			return retValue
-			*/
-			
-			return HelperTextPrefixSuffixEachLine(Text, Prefix, Suffix)	; (data, Prefix, Suffix)
-		}
-	;}
+		SB_SetText("No data entered for Prefix or Suffix.")
+		return
+	}
+	
+	if ( (StrLen(Prefix) > 0) or (StrLen(Suffix) > 0) )
+		return HelperTextPrefixSuffixEachLine(vText, Prefix, Suffix)	; (data, Prefix, Suffix)
+	else
+		return
 }
 
 HelperTextPrefixSuffixEachLine(data, Prefix, Suffix)
@@ -2751,153 +2712,107 @@ HelperTextSortRegexCaptureGroup1(vText, vRegExSearch) {
 	}
 
 	vResult := Join(arrLines, "`n")
-	;MsgBox % vResult
 	return vResult
 }
 
 TextSortAlphabetically(UserInput) {
-	; Sort selected text and replace it
+	; Sort selected text and replace it	
+	vText := UserInput
+	Sort, vText, ; Normal sort
 	
-	Text := UserInput
-	
-	;If ("" <> Text := Clip()) {
-		Sort, Text, ; Normal sort
-		;Clip(Text)
-		
-		;SetStatusMessageAndColor("Sorted alphabetically.", "Green")
-		SB_SetText("Sorted alphabetically.")
-		return Text
-	;}
+	SB_SetText("Sorted alphabetically.")
+	return vText
 }
 
 TextSortAlphabeticallyUnique(UserInput) {
-	; Sort selected text and replace it
+	; Sort selected text and replace it	
+	vText := UserInput
+	Sort, vText, C U ; Normal sort
 	
-	Text := UserInput
-	
-	;If ("" <> Text := Clip()) {
-		Sort, Text, C U ; Normal sort
-		;Clip(Text)
-		
-		;SetStatusMessageAndColor("Unique Sort Alphabetically.", "Green")
-		SB_SetText("Unique Sort Alphabetically.")
-		return Text
-	;}
+	SB_SetText("Unique Sort Alphabetically.")
+	return vText
 }
 
 TextSortAlphabeticallyUniqueCaseInsensitive(UserInput) {
-	; Sort selected text and replace it
+	; Sort selected text and replace it	
+	vText := UserInput
+	Sort, vText, U ; Normal sort
 	
-	Text := UserInput
-	;If ("" <> Text := Clip()) {
-		Sort, Text, U ; Normal sort
-		;Clip(Text)
-		
-		;SetStatusMessageAndColor("Unique Sort Alphabetically Case Insensitive.", "Green")
-		SB_SetText("Unique Sort Alphabetically Case Insensitive.")
-		return Text
-	;}
+	SB_SetText("Unique Sort Alphabetically Case Insensitive.")
+	return vText
 }
 
 TextSortAlphabeticallyWithDelimiter(UserInput) {
 	; Sort selected text and replace it
+	vText := UserInput		
+	Prompt = "Enter delimiter separating values"
+	InputBox, OutputVar, Enter Data for ..., %Prompt%, %HIDE%, %Width%, %Height%, %X%, %Y%, , %Timeout%, %Dft%
 	
-	Text := UserInput
+	Length := StrLen(OutputVar)
 	
-	;If ("" <> Text := Clip()) {
-		
-		Prompt = "Enter delimiter separating values"
-		InputBox, OutputVar, Enter Data for ..., %Prompt%, %HIDE%, %Width%, %Height%, %X%, %Y%, , %Timeout%, %Dft%
-		
-		Length := StrLen(OutputVar)
-		
-		if ( Length > 0 ) {
-			Sort, Text, D%OutputVar% ; Alphabetically sort for words/text separated by a delimiter
-			;Clip(Text)
-			
-			;SetStatusMessageAndColor("Sorted alphabetically with delimiter.", "Green")
-			SB_SetText("Sorted alphabetically with delimiter.")
-			return Text
-		}
-	;}
+	if ( StrLen(Length) == 0 )
+	{
+		SB_SetText("Delimiter not entered.")
+		return
+	}
+	
+	Sort, vText, D%OutputVar% ; Alphabetically sort for words/text separated by a delimiter
+	
+	SB_SetText("Sorted alphabetically with delimiter.")
+	return vText
 }
 
 TextSortNumericAscending(UserInput) {
-	; Sort selected text and replace it
+	; Sort selected text and replace it	
+	vText := UserInput
+	Sort, vText, N ; Numeric Sort
 	
-	Text := UserInput
-	;If ("" <> Text := Clip()) {
-		Sort, Text, N ; Numeric Sort
-		;Clip(Text)
-		
-		;SetStatusMessageAndColor("Sorted Numeric Ascending.", "Green")
-		SB_SetText("Sorted Numeric Ascending.")
-		return Text
-	;}
+	SB_SetText("Sorted Numeric Ascending.")
+	return vText
 }
 
 TextSortNumericDescending(UserInput) {
-	; Sort selected text and replace it
+	; Sort selected text and replace it	
+	vText := UserInput
+	Sort, vText, R N ; Reverse Numeric Sort
 	
-	Text := UserInput
-	;If ("" <> Text := Clip()) {
-		Sort, Text, R N ; Reverse Numeric Sort
-		;Clip(Text)
-		
-		;SetStatusMessageAndColor("Sorted Numeric Descending.", "Green")
-		SB_SetText("Sorted Numeric Descending.")
-		return Text
-	;}
+	SB_SetText("Sorted Numeric Descending.")
+	return vText
 }
 
 TextSortNumericWithDelimiter(UserInput) {
 	; Sort selected text and replace it
+	vText := UserInput		
+	Prompt = "Enter delimiter separating values"
+	InputBox, OutputVar, Enter Data for ..., %Prompt%, %HIDE%, %Width%, %Height%, %X%, %Y%, , %Timeout%, %Dft%
 	
-	Text := UserInput
-	;If ("" <> Text := Clip()) {
+	Length := StrLen(OutputVar)
+	
+	if ( Length > 0 ) {
+		Sort, vText, N D%OutputVar% ; Numeric Sort
 		
-		Prompt = "Enter delimiter separating values"
-		InputBox, OutputVar, Enter Data for ..., %Prompt%, %HIDE%, %Width%, %Height%, %X%, %Y%, , %Timeout%, %Dft%
-		
-		Length := StrLen(OutputVar)
-		
-		if ( Length > 0 ) {
-			Sort, Text, N D%OutputVar% ; Numeric Sort
-			;Clip(Text)
-			
-			;SetStatusMessageAndColor("Sorted Delimiter Numeric Data.", "Green")
-			SB_SetText("Sorted Delimiter Numeric Data.")
-			return Text
-		}
-	;}
+		SB_SetText("Sorted Delimiter Numeric Data.")
+		return vText
+	}
 }
 
 TextSortReverse(UserInput) {
 	; Sort selected text and replace it
+	vText := UserInput
+	Sort, vText, R ; Sort and then Reverse
 	
-	Text := UserInput
-	;If ("" <> Text := Clip()) {
-		Sort, Text, R ; Sort and then Reverse
-		;Clip(Text)
-		
-		;SetStatusMessageAndColor("Reverse sorted.", "Green")
-		SB_SetText("Reverse sorted.")
-		return Text
-	;}
+	SB_SetText("Reverse sorted.")
+	return vText
 }
 
 TextSortReverseOrder(UserInput) {
 	; Sort selected text and replace it
 	
-	Text := UserInput
-	;If ("" <> Text := Clip()) {
-		Sort, Text, F HelperReverseDirection ; Reverse order
-		;Clip(Text)
-		
-		;SetStatusMessageAndColor("Reverse ordered.", "Green")
-		SB_SetText("Reverse ordered.")
-		return Text
-	;}
+	vText := UserInput
+	Sort, vText, F HelperReverseDirection ; Reverse order
+	
+	SB_SetText("Reverse ordered.")
+	return vText
 }
 
 HelperReverseDirection(a1, a2, offset)
@@ -2906,38 +2821,33 @@ HelperReverseDirection(a1, a2, offset)
 }
 
 TextSortReverseWithDelimiter(UserInput) {
-	; Sort selected text and replace it
+	; Use AHK's standard sort to reverse sort values separated by a delimiter
 	
-	Text := UserInput
-	;If ("" <> Text := Clip()) {
+	vText := UserInput
 		
-		Prompt = "Enter delimiter separating values"
-		InputBox, OutputVar, Enter Data for ..., %Prompt%, %HIDE%, %Width%, %Height%, %X%, %Y%, , %Timeout%, %Dft%
-		
-		Length := StrLen(OutputVar)
-		
-		if ( Length > 0 ) {
-			Sort, Text, R D%OutputVar% ; Sort and then Reverse
-			;Clip(Text)
-			
-			;SetStatusMessageAndColor("Sort reversed delimiter text.", "Green")
-			SB_SetText("Sort reversed delimiter text.")
-			return Text
-		}
-	;}
+	Prompt = "Enter delimiter separating values"
+	InputBox, OutputVar, Enter Data for ..., %Prompt%, %HIDE%, %Width%, %Height%, %X%, %Y%, , %Timeout%, %Dft%
+	
+	Length := StrLen(OutputVar)
+	
+	if ( Length == 0 ) {
+		SB_SetText("User did not enter a delimiter.")
+		return
+	}
+	
+	Sort, vText, R D%OutputVar% ; Sort and then Reverse
+	
+	SB_SetText("Sort reversed delimiter text.")
+	return vText
 }
 
 TextSortRandom(UserInput) 
 {
-	; Sort selected text and replace it
+	; Use AHK's standard Sort function to randomly sort the text given - 
 	
-	Text := UserInput
-	;If ("" <> Text := Clip()) {
-		Sort, Text, Random ; Random sort text
-		;Clip(Text)
-		
-		;SetStatusMessageAndColor("Random sorted.", "Green")
-		SB_SetText("Random sorted.")
-		return Text
-	;}
+	vText := UserInput
+	Sort, vText, Random
+	
+	SB_SetText("Text sorted randomly.")
+	return vText
 }

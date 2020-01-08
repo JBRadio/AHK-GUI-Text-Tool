@@ -51,7 +51,6 @@ ButtonCopy:
 	GuiControlGet, OutputVarOutput,,EditOutput,Edit						; Gets output text box content
 	OutputVarStrReplace := StrReplace(OutputVarOutput, "`n", "`r`n")	; The "Edit" controls only have `n so need to add `r`n on "Copy"
 	Clipboard := OutputVarStrReplace									; Sets Windows Clipboard to updated output text box content
-	;SetStatusMessageAndColor("Copied output to Windows Clipboard.", "Green")
 	SB_SetText("Copied output to Windows Clipboard.")
 return
 
@@ -195,7 +194,8 @@ ListViewInit:
 	LV_Add("", "*SV (Extract 1 Column)", "*SV", "Pick a column to extract User-specific delimiter-SV row data from", "ExtractColumnDataForAnySV")
 	LV_Add("", "*SV (Filter 1 Column)", "*SV", "Pick a column to remove User-specific delimiter-SV row data from", "FilterColumnDataForAnySV")
 	LV_Add("", "*SV (Swap 1 Column)", "*SV", "Swap the position of one column's data with another column's position", "SwapColumnForAnySV")
-	LV_Add("", "*SV (Spaced Columns)", "*SV", "Print delimiter-SV data in spaced columns based on column data length", "SpacedColumnForAnySV")
+	LV_Add("", "*SV (Spaced Columns H)", "*SV", "Print delimiter-SV data in spaced columns, row data displayed horizontally", "SpacedColumnForAnySV")
+	LV_Add("", "*SV (Spaced Columns V)", "*SV", "Print delimiter-SV data in spaced columns, row data displayed vertically", "SpacedColumnVerticalForAnySV")
 	LV_Add("", "*SV (Sort by Column #)", "TSV", "Pick a column to sort TSV row data from", "SortDataByColumnForAnySV")
 	;
 	LV_Add("", "Flatten to 1 Line", "1+ Lines", "Condenses to one line - removing duplicate white space and new lines", "TextFlattenSingleLine")
@@ -213,6 +213,8 @@ ListViewInit:
 	;
 	LV_Add("", "Replace (AHK RegEx)", "1+ Lines", "Use AHK's RegEx to find and replace all matching text patterns", "TextReplaceRegex")
 	LV_Add("", "Replace (AHK RegEx Each Line)", "1+ Lines", "Use AHK's RegEx to find and replace text patterns line by line", "TextReplaceRegexEachLine")
+	LV_Add("", "Replace (AHK StringReplace)", "1+ Lines", "Use AHK's StringReplace to find and replace all matching text patterns", "TextReplaceStringReplace")
+	LV_Add("", "Replace (AHK StringReplace Each Line)", "1+ Lines", "Use AHK's StringReplace function to find and replace text patterns line by line", "TextReplaceStringReplaceEachLine")
 	LV_Add("", "Replace (Chars X Times)", "1+ Lines", "Replace a string of characters up to X occurrences, from left to right", "TextReplaceStringXTimes")
 	LV_Add("", "Replace (Chars w/ New Line)", "1+ Lines", "Replace character(s) with Carriage Return New Line feed (CRLF)", "TextReplaceCharsNewLine")
 	LV_Add("", "Replace (First Occurrence)", "1+ Lines", "Replace the first occurrence of a string in text block", "TextReplaceFirstStringOccurrence")
@@ -232,11 +234,15 @@ ListViewInit:
 	LV_Add("", "Reduce (Lines that exclude text)", "1+ Lines", "Reduces the input based on whether or not it excludes text", "RemoveLinesThatExcludeText")
 	LV_Add("", "Reduce (Lines that RegEx match)", "1+ Lines", "Reduces the input based on whether or not it excludes text", "RemoveLinesThatMatchRegEx")
 	LV_Add("", "Reduce (Lines that RegEx don't match)", "1+ Lines", "Reduces the input based on whether or not it excludes text", "RemoveLinesThatDontMatchRegEx")
+	LV_Add("", "Reduce (Whitespace)", "1+ Lines", "Trims and removes consecutive spacing in-between text", "RemoveWhitespace")
+	LV_Add("", "Reduce (Whitespace Each Line)", "1+ Lines", "Trims and removes consecutive spacing in-between text", "RemoveWhitespaceEachLine")
 	;
 	LV_Add("", "List (Ordinal Number)", "1+ Lines", "Prefixes lines of text with ordinal numbers. (Also see Prefix/Suffix)", "TextPrefixOrdinalNumber")
-	LV_Add("", "List (Ordinal Lowercase)", "1+ Lines", "Prefixes lines of text with ordinal lowercase letters. (Also see Prefix/Suffix)", "TextPrefixOrdinalLowercase")
-	LV_Add("", "List (Ordinal Uppercase)", "1+ Lines", "Prefixes lines of text with ordinal uppercase letters. (Also see Prefix/Suffix)", "TextPrefixOrdinalUppercase")
+	LV_Add("", "List (Ordinal Number Renumber Indented)", "1+ Lines", "Prefixes lines of text with ordinal numbers. (Also see Prefix/Suffix)", "TextPrefixOrdinalNumberRenumberIndented")
+	LV_Add("", "List (Ordinal Alpha Lowercase)", "1+ Lines", "Prefixes lines of text with ordinal lowercase letters. (Also see Prefix/Suffix)", "TextPrefixOrdinalLowercase")
+	LV_Add("", "List (Ordinal Alpha Uppercase)", "1+ Lines", "Prefixes lines of text with ordinal uppercase letters. (Also see Prefix/Suffix)", "TextPrefixOrdinalUppercase")
 	LV_Add("", "List (Unordered Custom Character)", "1+ Lines", "Prefixes lines of text with a custom character. (Also see Prefix/Suffix)", "TextPrefixCustomRepeatingCharacter")
+	LV_Add("", "List (Nested \_ )", "1+ Lines", "Prefixes 2nd+ lines of text with spaces and \_ .", "TextPrefixNestedList")
 	;
 	LV_Add("", "Trim (Both)", "1+ Lines", "Removes whitespace before and after text", "TextTrim")
 	LV_Add("", "Trim (Left)", "1+ Lines", "Removes whitespace before text", "TextTrimLeft")
@@ -260,7 +266,7 @@ ListViewInit:
 	; Markdown (to HTML), "1+ Lines", "Convert Markdown (MD) to HTML" -- see Markdown_2_HTML.ahk by JasonDavis for code and GUI application (From Others folder)
 	;
 	LV_Add("", "Sort (Regex Capture Group 1)", "2+ Lines", "Sorts lines by the value captured in group 1 of a RegEx", "TextSortRegexCaptureGroup1")
-    LV_Add("", "Sort (Alpha Asc)", "1+ Lines", "Sort lines of text alphabetically ascendingly", "TextSortAlphabetically")
+	LV_Add("", "Sort (Alpha Asc)", "1+ Lines", "Sort lines of text alphabetically ascendingly", "TextSortAlphabetically")
 	LV_Add("", "Sort (Alpha Unique Asc)", "1+ Lines", "Sort unique lines of text alphabetically ascendingly", "TextSortAlphabeticallyUnique")
 	LV_Add("", "Sort (Alpha Unique Case Insensitive Asc)", "1+ Lines", "Sort unique lines of text alphabetically, ascendingly, and case sensitive", "TextSortAlphabeticallyUniqueCaseInsensitive")
 	LV_Add("", "Sort Line w/ Delimiter (Alpha Asc)", "1+ Lines", "Split line by delimiter and sort alphabetically, ascendingly", "TextSortAlphabeticallyWithDelimiter")

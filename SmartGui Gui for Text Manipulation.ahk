@@ -55,6 +55,67 @@
 /*
 CHANGE LOG
 ----------
+2019.12.01:
+			Main file
+			 * Minor screen change, "Ouput" to "Output" above text box
+			Function: sendMessageMouseWheel() - created to reduce redundant code
+			
+			AHK
+			 * Updated to version 1.1.32.0
+ 
+ 2019.11.22: 
+			TAB GENERAL MODEL.AHK
+			Function: SpacedColumnVerticalForAnySV - *SV (Spaced Columns V), also renamed existing function to *SV (Spaced Columns H)
+			 * Prints row data vertically, rather than horizontally
+			 * Dependencies: HelperSpacedColumnVerticallyForAnySV, HelperFindRowMaxWidth
+
+ 2019.11.15:
+			TAB GENERAL MODEL.AHK
+			Function: RemoveWhitespaceEachLine *NEW*
+			 * Removes duplicate whitespace by removing preceeding/trailing whitespace (trim) first and then duplicate whitespace between text
+
+ 2019.11.09:
+			Main Program
+			DebuggerMode (Ctrl+Alt+Shit+d)
+			 * Allow for simple debugger info by MsgBox (Wheelup/down when ListView doesn't scroll with wheel)
+			 
+ 2019.11.01-02:
+			TAB GENERAL MODEL.AHK
+			Function RemoveWhitespace
+			 * Reduces whitespace - whenever there is 2+ in a row, it is reduced to one
+			
+ 2019.10.25-27:
+			TAB GENERAL MODEL.AHK
+			Function: TextReplaceStringReplace "Replace (AHK StringReplace)"
+			 * Use AHK's StringReplace to find and replace all matching text patterns
+			Function: TextReplaceStringReplaceEachLine "Replace (AHK StringReplace Each Line)"
+			 * Use AHK's StringReplace function to find and replace text patterns line by line
+			Function: TextPrefixOrdinalNumberRenumberIndented "List lines with ordinal numbers, renumbered for indented line items"
+			 * 1 -> 2 -> 3 .... 1 -> 1.1 -> 1.2 -> 2 -> 2.1 -> 2.2 -> 3
+
+ 2019.10.19-20:
+			TAB GENERAL MODEL.AHK
+			Function: TextPrefixNestedList
+			 * Take a List (lines of text) and converts it into a level/nested-oriented list
+			 
+ 2019.09.20:
+            TAB GENERAL MODEL.AHK
+             * Removing commented out superfluous status bar message functions - replaced by SB_SetText()
+             * Removed unnecessary comments and commented out code
+             * Reviewing changes to reduce redundant code
+ 
+ 2019.09.15: 
+			GENERAL TAB
+			Function: HelperFilterColumnDataForAnySV
+			 * Created new reusable functions and trimmed down size of the function
+				HelperDynamicallyFindHeightForInputBox(vPromptText) - Function to determine height for AHK InputBox based on number of new lines (`n) found in the Prompt message
+				HelperBuildPickAColumn(vRowFirst) - Returns "Pick a number between 1 and {Max Columns}"
+				HelperBuildVerticalSampleRow(vRowFirst) - Returns the first row of data, numbered and separated by new lines (`n)
+			Function: HelperAskUserForDelim
+			 * Now uses HelperDynamicallyFindHeightForInputBox for its prompt message
+				Prompt := "What character separates the data?"
+				Height := HelperDynamicallyFindHeightForInputBox(Prompt) ; (vPromptText)
+            
  2019.09.08:
 			GUI/ / Application
 			 * Changed font to fixed-width font (Consolas) for input/output text boxes
@@ -103,11 +164,11 @@ Gui, Add, Tab3, y+5 vTabVar, General|Programmer
 
 Gui, Tab, General,, Exact
 #Include %A_ScriptDir%\MVC\Tab General VIEW.ahk
-;Gui, Add, Button, Hidden Default, OK
+;Gui, Add, Button, Hidden Default, OK ; Uncomment if General is the only tab
 
 Gui, Tab, Programmer,, Exact
 #Include %A_ScriptDir%\MVC\Tab Programmer VIEW.ahk
-;Gui, Add, Button, Hidden Default, OKProg
+;Gui, Add, Button, Hidden Default, OKProg ; Uncomment if Programmer is the only tab
 
 Gui, Tab  ; i.e. subsequently-added controls will not belong to the tab control.
 Gui, Add, Button, Hidden Default, OK	; Allows for enter key on ListView to submit choice
@@ -121,7 +182,7 @@ Gui, Add, Edit, vEditOutput x17 y315 w330 h70 ReadOnly, Readonly processed resul
 
 Gui, Font, bold
 Gui, Add, Text, vGuiTextUserInput x17 y185 w80 h20, User Input 	; Additional 10 for y
-Gui, Add, Text, vGuiTextOutput x17 y295 w80 h20, Ouput		 	; Additional 10 for y
+Gui, Add, Text, vGuiTextOutput x17 y295 w80 h20, Output		 	; Additional 10 for y
 
 Gui, Font, norm ; remove bold
 Gui, Font,,MS Shell Dlg
@@ -174,7 +235,7 @@ GuiSize:
 		; Output	x17 y315 w330 h70
 		
 		hMaxEditInput := (A_ScreenHeight / 3) - 5
-		;MsgBox % hMaxEditInput
+        ;MsgBox % "hMaxEditInput: " hMaxEditInput
 		
 		;hEditInput := (A_GuiHeight-355) / 1.5 < 150 ? (A_GuiHeight-355) / 1.5 : 150 ; Max Height = 580
 		hEditInput := (A_GuiHeight-355) / 1.5 < hMaxEditInput ? (A_GuiHeight-355) / 1.5 : hMaxEditInput ; Max Height = 580
@@ -203,7 +264,7 @@ return
 	; If GUI is showing but not active - Activate it / Show it
 	; If GUI is showing and active - Hide it
 	; If GUI is not showing - Show it
-	
+	;
 	WinGetTitle, vTitle, A
 	WinGetClass, vClass, A
 	
@@ -225,14 +286,25 @@ return
 
 #IfWinActive ahk_class AutoHotkeyGUI ; Do not block Escape key usage for non-AHK GUI Applications
 
+; Workaround to execute code when pressing enter in ListView, when there are multiple ListView and multiple Tabs
+; https://autohotkey.com/board/topic/55167-using-enter-with-multiple-listviews-in-one-script/
+#IfWinActive, Text Manipulation
+
+/*
+^!+d::
+	DebuggerMode := !DebuggerMode
+	if (DebuggerMode)
+		MsgBox % "DebuggerMode On!"
+	else
+		MsgBox % "DebuggerMode Off!"
+return
+*/
+
 ; When user hits escape while AutoHotkey GUI is active
 ESC::
     Gui, Hide
 return
 
-; Workaround to execute code when pressing enter in ListView, when there are multiple ListView and multiple Tabs
-; https://autohotkey.com/board/topic/55167-using-enter-with-multiple-listviews-in-one-script/
-#IfWinActive, Text Manipulation
 Enter::
 	GuiControlGet, OutputVarFocusedVariable, FocusV
 	if ( OutputVarFocusedVariable == "MyListView" )
@@ -264,6 +336,10 @@ EnterKeyPressedOnListView()
 WheelDown::
 	GuiControlGet, OutputVarFocusedVariable, FocusV
 	GuiControlGet, Current_Tab,,TabVar
+    
+    ;if (DebuggerMode)
+	;	MsgBox % "DEBUG WheelDown FocusV: " OutputVarFocusedVariable
+    
 	;~ if ( OutputVarFocusedVariable == "MyListView" or Current_Tab == "General" )
 	;~else if ( OutputVarFocusedVariable == "MyListViewProg" or Current_Tab == "Programmer")
 	; Prevents scrolling in textbox
@@ -290,14 +366,18 @@ return
 WheelUp::
 	GuiControlGet, OutputVarFocusedVariable, FocusV
 	;GuiControlGet, Current_Tab,,TabVar
+    
+    ;if (DebuggerMode)
+	;	MsgBox % "DEBUG WheelUp FocusV: " OutputVarFocusedVariable
+    
 	;if ( OutputVarFocusedVariable == "MyListView" or Current_Tab == "General" )
 	;else if ( OutputVarFocusedVariable == "MyListViewProg" or Current_Tab == "Programmer" )
 	; Prevents scrolling in textboxes
 	
 	if ( OutputVarFocusedVariable == "MyListView" )
 	{
-		;~ Gui, ListView, MyListView
-		;~ GuiControl,, MyListView
+		;~Gui, ListView, MyListView
+		;~GuiControl,, MyListView
 		sendmessage, 0x115, 0, 0,, ahk_id %MyListView% ; Works with hwndhlv on Gui, Add, ListView
 	}
 	else if ( OutputVarFocusedVariable == "MyListViewProg" )
@@ -317,31 +397,23 @@ return
 	; Scroll slowly for maximum effect
 	GuiControlGet, OutputVarFocusedVariable, FocusV
 	;GuiControlGet, Current_Tab,,TabVar
+    
+    ;if (DebuggerMode)
+	;	MsgBox % "DEBUG +WheelDown FocusV: " OutputVarFocusedVariable
+    
 	;if ( OutputVarFocusedVariable == "MyListView" or Current_Tab == "General" )
 	;else if ( OutputVarFocusedVariable == "MyListViewProg" or Current_Tab == "Programmer" )
 	if ( OutputVarFocusedVariable == "MyListView" )
 	{
 		Gui, ListView, MyListView
 		GuiControl,, MyListView
-		sendmessage, 0x114, 1, 0,, ahk_id %MyListView% ; Works with hwndhlv on Gui, Add, ListView ; 0x114 is WM_HSCROLL
-		sendmessage, 0x114, 1, 0,, ahk_id %MyListView% ; Works with hwndhlv on Gui, Add, ListView ; 0x114 is WM_HSCROLL
-		sendmessage, 0x114, 1, 0,, ahk_id %MyListView% ; Works with hwndhlv on Gui, Add, ListView ; 0x114 is WM_HSCROLL
-		sendmessage, 0x114, 1, 0,, ahk_id %MyListView% ; Works with hwndhlv on Gui, Add, ListView ; 0x114 is WM_HSCROLL
-		sendmessage, 0x114, 1, 0,, ahk_id %MyListView% ; Works with hwndhlv on Gui, Add, ListView ; 0x114 is WM_HSCROLL
-		sendmessage, 0x114, 1, 0,, ahk_id %MyListView% ; Works with hwndhlv on Gui, Add, ListView ; 0x114 is WM_HSCROLL
-		sendmessage, 0x114, 1, 0,, ahk_id %MyListView% ; Works with hwndhlv on Gui, Add, ListView ; 0x114 is WM_HSCROLL
+        sendMessageMouseWheel(MyListView, "Down", 7) ; (vID, vDirection, vTimes := 0)
 	}
 	else if ( OutputVarFocusedVariable == "MyListViewProg" )
 	{
 		Gui, ListView, MyListViewProg
 		GuiControl,, MyListViewProg
-		sendmessage, 0x114, 1, 0,, ahk_id %MyListViewProg% ; Works with hwndhlv on Gui, Add, ListView
-		sendmessage, 0x114, 1, 0,, ahk_id %MyListViewProg% ; Works with hwndhlv on Gui, Add, ListView
-		sendmessage, 0x114, 1, 0,, ahk_id %MyListViewProg% ; Works with hwndhlv on Gui, Add, ListView
-		sendmessage, 0x114, 1, 0,, ahk_id %MyListViewProg% ; Works with hwndhlv on Gui, Add, ListView
-		sendmessage, 0x114, 1, 0,, ahk_id %MyListViewProg% ; Works with hwndhlv on Gui, Add, ListView
-		sendmessage, 0x114, 1, 0,, ahk_id %MyListViewProg% ; Works with hwndhlv on Gui, Add, ListView
-		sendmessage, 0x114, 1, 0,, ahk_id %MyListViewProg% ; Works with hwndhlv on Gui, Add, ListView
+        sendMessageMouseWheel(MyListViewProg, "Down", 7) ; (vID, vDirection, vTimes := 0)
 	}
 	else
 	{
@@ -351,32 +423,25 @@ return
 
 +WheelUp::
 	;WheelLeft
-	; Scroll slowly for maximum effect
+	; Horizontal scroll, WheelLeft
+    ;
 	GuiControlGet, OutputVarFocusedVariable, FocusV
-	GuiControlGet, Current_Tab,,TabVar
+    ;GuiControlGet, Current_Tab,,TabVar ; Does this need to be here?
+	
+	;if (DebuggerMode)
+	;	MsgBox % "DEBUG +WheelUp FocusV: " OutputVarFocusedVariable 
+    
 	if ( OutputVarFocusedVariable == "MyListView"  or Current_Tab == "General" )
 	{
 		Gui, ListView, MyListView
 		GuiControl,, MyListView
-		sendmessage, 0x114, 0, 0,, ahk_id %MyListView% ; Works with hwndhlv on Gui, Add, ListView ; 0x114 is WM_HSCROLL
-		sendmessage, 0x114, 0, 0,, ahk_id %MyListView% ; Works with hwndhlv on Gui, Add, ListView ; 0x114 is WM_HSCROLL
-		sendmessage, 0x114, 0, 0,, ahk_id %MyListView% ; Works with hwndhlv on Gui, Add, ListView ; 0x114 is WM_HSCROLL
-		sendmessage, 0x114, 0, 0,, ahk_id %MyListView% ; Works with hwndhlv on Gui, Add, ListView ; 0x114 is WM_HSCROLL
-		sendmessage, 0x114, 0, 0,, ahk_id %MyListView% ; Works with hwndhlv on Gui, Add, ListView ; 0x114 is WM_HSCROLL
-		sendmessage, 0x114, 0, 0,, ahk_id %MyListView% ; Works with hwndhlv on Gui, Add, ListView ; 0x114 is WM_HSCROLL
-		sendmessage, 0x114, 0, 0,, ahk_id %MyListView% ; Works with hwndhlv on Gui, Add, ListView ; 0x114 is WM_HSCROLL
+        sendMessageMouseWheel(MyListView, "Up", 7) ; (vID, vDirection, vTimes := 0)
 	}
 	else if ( OutputVarFocusedVariable == "MyListViewProg" or Current_Tab == "Programmer" )
 	{
 		Gui, ListView, MyListViewProg
 		GuiControl,, MyListViewProg
-		sendmessage, 0x114, 0, 0,, ahk_id %MyListViewProg% ; Works with hwndhlv on Gui, Add, ListView
-		sendmessage, 0x114, 0, 0,, ahk_id %MyListViewProg% ; Works with hwndhlv on Gui, Add, ListView
-		sendmessage, 0x114, 0, 0,, ahk_id %MyListViewProg% ; Works with hwndhlv on Gui, Add, ListView
-		sendmessage, 0x114, 0, 0,, ahk_id %MyListViewProg% ; Works with hwndhlv on Gui, Add, ListView
-		sendmessage, 0x114, 0, 0,, ahk_id %MyListViewProg% ; Works with hwndhlv on Gui, Add, ListView
-		sendmessage, 0x114, 0, 0,, ahk_id %MyListViewProg% ; Works with hwndhlv on Gui, Add, ListView
-		sendmessage, 0x114, 0, 0,, ahk_id %MyListViewProg% ; Works with hwndhlv on Gui, Add, ListView
+        sendMessageMouseWheel(MyListViewProg, "Up", 7) ; (vID, vDirection, vTimes := 0)
 	}
 	else
 	{
@@ -384,7 +449,41 @@ return
 	}
 return
 
+sendMessageMouseWheel(vID, vDirection, vTimes := 0){
+	
+    Loop % vTimes
+    {
+        if ( vDirection == "Up" )
+            sendmessage, 0x114, 0, 0,, ahk_id %vID% ; Works with hwndhlv on Gui, Add, ListView ; 0x114 is WM_HSCROLL
+        else if ( vDirection == "Down" )
+            sendmessage, 0x114, 1, 0,, ahk_id %vID% ; Works with hwndhlv on Gui, Add, ListView ; 0x114 is WM_HSCROLL
+    }
+}
+
+
 #IfWinActive ; Restore hotkeys to work from any environment
+
+; DEBUG CODE TO SEE WHY LISTVIEW LOSES ABILITY TO BE SCROLLED
+WheelDown::
+	GuiControlGet, OutputVarFocusedVariable, FocusV
+	GuiControlGet, Current_Tab,,TabVar
+	
+	;if (DebuggerMode)
+	;	MsgBox % "DEBUG WheelDown FocusV: " OutputVarFocusedVariable 
+	
+	SendInput, {WheelDown}
+return
+
+; DEBUG CODE TO SEE WHY LISTVIEW LOSES ABILITY TO BE SCROLLED
+WheelUp::
+	GuiControlGet, OutputVarFocusedVariable, FocusV
+	;GuiControlGet, Current_Tab,,TabVar
+	
+	;if (DebuggerMode)
+	;	MsgBox % "DEBUG WheelUp FocusV: " OutputVarFocusedVariable 
+	
+	SendInput, {WheelUp} ; Do not prevent default behavior
+return
 
 #Include %A_ScriptDir%\MVC\Tab General CONTROLLER.ahk		; General Tab's Controller - button logic
 #Include %A_ScriptDir%\MVC\Tab General MODEL.ahk 			; Includes all the functions called upon by the General Tab's Functions
