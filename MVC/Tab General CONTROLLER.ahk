@@ -204,6 +204,7 @@ ListViewInit:
 	LV_Add("", "Indent More", "1+ Lines", "Tabs one or more lines of text", "TextFormatIndentMore")
 	LV_Add("", "Indent Less", "1+ Lines", "Decreases tabs by one for one or more lines of text", "TextFormatIndentLess")
 	;
+	LV_Add("", "Join Broken Lines w/ w/o Char", "1+ Lines", "Joins every x lines as user defined to a single line by user entered separator", "TextJoinBrokenLines")
 	LV_Add("", "Join Lines w/ w/o Char", "1+ Lines", "Joins lines of text to a single line by user entered separator", "TextJoinLinesWithChar")
 	LV_Add("", "Join SV Line w/ Char", "1+ Lines", "Split and join a line of text by user entered separator", "TextJoinSplittedLineWithChar")
 	LV_Add("", "Join SV Lines w/ Char", "1+ Lines", "Split and join lines of text by user entered separator", "TextJoinSplittedLinesWithChar")
@@ -257,7 +258,8 @@ ListViewInit:
 	LV_Add("", "Speak (Stop)", "1+ Lines", "Stop using Windows Speak", "TextSayStop")
 	;
 	LV_Add("", "Prefix/Suffix (Matching)", "1+ Lines", "Surround text block with matching symbols", "TextSurroundingChar")
-	LV_Add("", "Prefix/Suffix Remove (Text or RegEx)", "1+ Lines", "Remove Prefix/Suffix of text from each line", "TextPrefixSuffixRemoveEachLine")
+	LV_Add("", "Prefix/Suffix Remove (Text)", "1+ Lines", "Remove Prefix/Suffix of text from each line", "TextPrefixSuffixRemoveEachLine")
+	LV_Add("", "Prefix/Suffix Remove (Regex)", "1+ Lines", "Remove Prefix/Suffix of text from each line, using AHK Regex", "TextPrefixSuffixRemoveEachLineRegex")
 	LV_Add("", "Prefix/Suffix Lines", "1+ Lines", "Adds a custom Prefix/Suffix of text to each line", "TextPrefixSuffixEachLine")
 	;
 	;LV_Add("", "HTML (Add Tag)", "1+ Lines", "Surround text with user defined HTML tag", "TextSurroundingHTMLTag") - Moved to Programmer

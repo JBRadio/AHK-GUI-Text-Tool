@@ -255,6 +255,11 @@ HelperGetSVDataIntoRowsArray(data, delim)
 	{
 		arrSplitted := StrSplit(A_LoopField, delim)
 		
+		Loop % arrSplitted.MaxIndex()
+		{
+			arrSplitted[A_Index] := Trim(arrSplitted[A_Index])
+		}
+	
 		if ( arrSplitted.Length() == 0 or arrSplitted == )
 			continue ; Even a non-delimiter value returns something so return if somehow we have nothing.
 		
@@ -285,8 +290,11 @@ HelperExtractColumnDataForAnySV(data, delim)
 	if ( intColumns < 1 )
 		return
 
-	SampleRow := Join(arrRows[1], ",")
-	Prompt := "Extract Column: Pick a number between 1 and " . intColumns . "`r`n`r`nHere is a Sample row: `r`n" . SampleRow
+	;SampleRow := Join(arrRows[1], ",")
+	;Prompt := "Extract Column: Pick a number between 1 and " . intColumns . "`r`n`r`nHere is a Sample row: `r`n" . SampleRow
+	vSampleRow := HelperBuildVerticalSampleRow(arrRows[1]) ; (vRowFirst)
+	Prompt := "Filter Column: " Prompt "`n`nHere is a Sample row: `n" vSampleRow
+	Height := HelperDynamicallyFindHeightForInputBox(Prompt) ; (vPromptText)
 
 	ErrorLevel =
 	InputBox, OutputVar, Enter Data for ..., %Prompt%, %HIDE%, %Width%, %Height%, %X%, %Y%, , %Timeout%, %Dft%
@@ -661,11 +669,12 @@ HelperFindColumnMaxWidth(arrData)
 		Loop, % arrData[A_Index].MaxIndex()
 		{ ; Columns
 			cIndex := A_Index ; column index
+			cValue := arrData[rIndex][cIndex]
 			
 			if ( rIndex == 1 )
-				colMaxWidth[cIndex] := StrLen(arrData[rIndex][cIndex])
-			else if (colMaxWidth[cIndex] < StrLen(arrData[rIndex][cIndex]) )
-				colMaxWidth[cIndex] := StrLen(arrData[rIndex][cIndex])
+				colMaxWidth[cIndex] := StrLen(cValue)
+			else if (colMaxWidth[cIndex] < StrLen(cValue) )
+				colMaxWidth[cIndex] := StrLen(cValue)
 		}
 	}
 	
@@ -1084,7 +1093,107 @@ TextGenerateLoremIpsum()
 	return "Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum."
 }
 
+
 ; -----------------------------------------------------------------------------------------------------------
+
+TextJoinBrokenLines(UserInput) {
+	/* Combine pairs to one line
+	 *  - Input:
+	 * 	Every X lines, combine them
+	 * 	Text to perform operation on
+	 *  - Output:
+	 * 	Reduced lines
+	 *  - Suggestion:
+	 * 	If the X does not divide evenly, reduce the remaining lines together
+	 * 	 So if X=3 and there are 5 lines, combine 1-3 and 4-5
+	 *  - Pseudo Code
+	 * 	Ask if combining every 2 or more lines
+	 * 	Split input text into lines
+	 * 	Loop through lines
+	 * 	  Build output text based on input, use "`n" after X lines
+	 * 	Output results
+	 */
+
+	vInputText = %UserInput%
+	vLines := StrSplit(vInputText, "`n")
+	vLineCount := vLines.Count()
+	
+	; DEBUG
+	;MsgBox % vInputText
+	;MsgBox % "Line Count: " vLineCount
+	
+	Prompt := "Combine every x lines into one line."
+	Dft := 2
+	InputBox, OutputVar, Enter value for x, %Prompt%, %HIDE%, %Width%, %Height%, %X%, %Y%, , %Timeout%, %Dft%
+
+	OutputVar := Trim(OutputVar)
+
+	if ( StrLen(OutputVar) == 0 ) {
+		SB_SetText("Not a valid response (No valude entered)")
+		return ; Not a valid response (No valude entered)
+	}
+
+	if ( isNaN(OutputVar) ) {
+		SB_SetText("Not a valid response (Not a number)")
+		return ; Not a valid response (Not a number)
+	}
+
+	if ( OutputVar >= vLineCount ) {
+		SB_SetText("Not a valid response (Number is greater than or equal to the total number of lines)")
+		return ; Not a valid response (Number is greater than or equal to the total number of lines)
+	}
+
+	if ( OutputVar <= 1 ) {
+		SB_SetText("Not a valid response (Number is less than or greater than zero)")
+		return ; Not a valid response (Number is less than or greater than zero)
+	}
+
+	Prompt := "Character between each line? (Nothing is acceptable)"
+	Dft := 
+	InputBox, joinChar, Enter value for x, %Prompt%, %HIDE%, %Width%, %Height%, %X%, %Y%, , %Timeout%, %Dft%
+
+	vInputText := Trim(vInputText)
+
+	if ( StrLen(vInputText) == 0 ) {
+		SB_SetText("Not a valid input (No input to process)")
+		return ; Not a valid input (No input to process)
+	}
+	
+	if ( vLineCount == 1 ) {
+		SB_SetText("Not a valid input (Already one line)")
+		return ; Not a valid input (Already one line)
+	}
+
+	vResults := ""
+	Loop % vLines.Count() {
+		
+		if ( (A_Index != vLines.Count()) and (A_Index != 1) )
+			vResults := vResults . joinChar
+		
+		vResults := vResults . vLines[A_Index]
+		
+		if ( Mod(A_Index, OutputVar) == 0 )
+			vResults := vResults . "`n"
+	}
+
+	return vResults
+}
+
+; -----------------------------------------------------------------------------------------------------------
+
+; -----------------------------------------------------------------------------------------------------------
+
+isNaN(x){    
+	if x is number
+		return false 
+	else	  
+		return true 
+} 
+
+; -----------------------------------------------------------------------------------------------------------
+
+; -----------------------------------------------------------------------------------------------------------
+
 ; Join lines of text to a single line, separated by a user-defined character
 TextJoinLinesWithChar(UserInput) {
 	; 1.) Get content (Text) and put into clipboard
@@ -1107,7 +1216,12 @@ HelperTextJoinLinesWithChar(vText, vJoinChar)
 	vResults := 
 	
 	Loop, Parse, vText, `n, `r 
-		vResults .= vJoinChar A_LoopField
+	{
+		if (A_Index > 1)
+			vResults .= vJoinChar A_LoopField
+		else
+			vResults = %A_LoopField% ; Join character starts being used after the first item
+	}
 	
 	if (StrLen(varJoiner) > 0)
 		vResults := Substr(vResults, StrLen(vJoinChar) + 1) ; Remove excess "varJoiner" from the beginning of the first line
@@ -1217,6 +1331,7 @@ OpenLinkRegExr()
 ; "A file name can't contain any of the following characters: \ / : * ? " < > |
 TextMakeWindowsFileFriendly(UserInput) {
 	vText := UserInput
+	vNewLine := "`r`n"
 	@ := ""
 	
 	Loop, Parse, vText, `n, `r 
@@ -1232,11 +1347,13 @@ TextMakeWindowsFileFriendly(UserInput) {
 		tempText := RegExReplace(tempText, "<", "_")
 		tempText := RegExReplace(tempText, ">", "_")
 		tempText := RegExReplace(tempText, "\|", "_")
-		@ .= tempText
+		@ .= vNewLine tempText
 	}
+	
+	vResult := SubStr(@, StrLen(vNewLine) + 1)
 
 	SB_SetText("Characters are now Windows Filesystem friendly.")
-	return SubStr(@, StrLen(tempText) + 1)
+	return vResult
 }
 ; -----------------------------------------------------------------------------------------------------------
 
@@ -2478,7 +2595,7 @@ TextCharLineUp(UserInput) {
 	; Loop to determine the line with the most amount of characters before special character (Item1: Fun = 5 characters before ":")
 	; Loop again to precede line with spaces until all lines match (line 1 has 5 characters/spaces before ":" and so done line 2, 3, 4, etc.)
 	
-	Prompt = "Character to line up with?"
+	Prompt := "Which (1st occurence) character to line up text with?"
 	InputBox, OutputVar, Enter Data for ..., %Prompt%, %HIDE%, %Width%, %Height%, %X%, %Y%, , %Timeout%, %Dft%
 		
 	if ( OutputVar <> "" )
@@ -2550,6 +2667,58 @@ TextSurroundingChar(UserInput) {
 }
 
 TextPrefixSuffixRemoveEachLine(UserInput) {
+
+	vText := UserInput
+
+	Prompt = "Enter prefix text to remove from each line"
+	InputBox, OutputVar, Enter Data for ..., %Prompt%, %HIDE%, %Width%, %Height%, %X%, %Y%, , %Timeout%, %Dft%
+	Prefix := OutputVar
+	
+	Prompt = "Enter suffix text to remove from each line"
+	InputBox, OutputVar, Enter Data for ..., %Prompt%, %HIDE%, %Width%, %Height%, %X%, %Y%, , %Timeout%, %Dft%
+	Suffix := OutputVar
+
+	if ( (StrLen(Prefix) == 0) and (StrLen(Suffix) == 0) )
+	{
+		SB_SetText("No data entered for Prefix or Suffix.")
+		return
+	}
+	
+	doPrefix := false
+	doSuffix := false
+	
+	if ( StrLen(Prefix) > 0 )
+		doPrefix := true
+	
+	if ( StrLen(Suffix) > 0 )
+		doSuffix := true
+		
+	NewLine := "`r`n"
+	@ := 
+	
+	Loop, Parse, vText, `n, `r
+	{
+      line := A_LoopField
+		
+      ; Prefix: Left-to-Right search
+      if ( doPrefix && (InStr(line, Prefix) = 1) )
+         line := SubStr(line, (StrLen(Prefix)+1) )
+      
+      ; Suffix: Right-to-Left search; Make sure it's at the end of the line
+      if ( doSuffix && InStr(line, Suffix, 0) && ((InStr(line, Suffix, 0) - 1 + StrLen(Suffix)) = StrLen(line)) )
+         line := SubStr(line, 1, (InStr(line, Suffix, 0) - 1))
+      
+		@ .= NewLine
+		@ .= line
+	}
+	
+	retValue := SubStr(@, StrLen(NewLine) +1) ; Remove last new line (`r`n) or blank line
+	
+	SB_SetText("Removed Prefix/Suffix (Text/RegEx).")
+	return retValue
+}
+
+TextPrefixSuffixRemoveEachLineRegex(UserInput) {
 	; Wrap the text with a open/close HTML tag
 
 	vText := UserInput

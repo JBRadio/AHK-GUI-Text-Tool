@@ -1,4 +1,4 @@
-﻿; AHK GUI for Text Manipulation
+; AHK GUI for Text Manipulation
 ; Author: James E Burns
 ;
 ; Types of Text Input
@@ -17,7 +17,6 @@
 ;   WEB: JSON, XML, HTML, CSS
 ;   JavaScript
 ;   PHP
-;
 ;
 ; Ideas for GUI/Usage/User Feedback Improvement
 ;  - Remove "Done." as the default status text for functions. Allow functions to return "Done." or something else.
@@ -55,15 +54,74 @@
 /*
 CHANGE LOG
 ----------
-2019.12.01:
+ 2021.07.03:
+			SMARTGUI TEXT MANIPULATION.AHK
+			Added the app main menu bar (File, Edit, Input, Output, Options, Help)
+			 * Add "File" Menu - Open Folder, Reload, Close, ExitApp
+			 * Add "Input" Menu - Clear, Copy, Paste, Process
+			 * Add "Output" Menu - Copy, Move Up
+			 * Add "Help" Menu - About This Tool
+ 2021.06.27:
+			TAB GENERAL MODEL.AHK
+			Function: HelperExtractColumnDataForAnySV
+			 * Changed how the sample row, to choose which column to extract, is presented. Now lists each column in a new line with it's number choice.
+ 2021.03.07:
+			TAB GENERAL MODEL.AHK
+			Function: TextPrefixSuffixRemoveEachLine
+			 * Removed Regex and moved it to its own function. This function now does a simple replace. Prefix removal may not work will with beginning indentation.
+			
+			Function: TextPrefixSuffixRemoveEachLineRegex *NEW*
+			 * Same code as previous version of TextPrefixSuffixRemoveEachLine
+			
+			TAB GENERAL CONTROLLER.AHK
+			ListViewInit:
+			 * Made distinct options ( "Prefix/Suffix Remove (Text)"and "Prefix/Suffix Remove (Regex)" )
+			 
+ 2020.11.07:
+            TAB GENERAL MODEL.AHK
+			Function: HelperGetSVDataIntoRowsArray
+			 * Now trims each cell value ([row][colum])
+ 
+ 2020.08.14:
+			TAB GENERAL MODEL.AHK
+			Function: HelperTextJoinLinesWithChar
+			 * Updated the join to take place after the first item. Previously, the joining/separating character was being applied before the list instead of between list items.
+ 
+ 2020.06.21:
+			TAB GENERAL MODEL.AHK
+			Function: TextCharLineUp
+			 * Removed quotations on prompt box
+ 2020.05.09:
+			TAB GENERAL MODEL.AHK
+			Function: TextJoinBrokenLines - Join Broken Lines w/ w/o Char", "1+ Lines", "Joins every x lines as user defined to a single line by user entered separator"
+ 
+ 2020.01.26:
+			Main file
+			 * Removed Script Hotkey Ctrl+Alt+R - Created "My AHK Script Reloader" application to handle the reloading and manage AHK scripts
+
+ 2020.01.25:
+            Main file
+			Made all #Include paths relative to %A_ScriptDir%\, so that the script can be reloaded by another script, if necessary
+			
+ 2020.01.11:
+			Main file
+			Hotkey to Reload this script (CTRL+ALT+R) - Remove in EXE version
+			Hotkey to Edit this script (CTRL+ALT+E) - Remove in EXE version
+			Hotkey to Open folder of Source code (CTRL+ALT+F) - Remove in EXE version
+			
+			TAB GENERAL MODEL.AHK
+			Function: TextMakeWindowsFileFriendly - "Replace (Windows)" *** Function shared to Programmer tab/controller
+			 * Results returned was incorrect due to incorrect SubStr() arguments.
+			
+ 2019.12.01:
 			Main file
 			 * Minor screen change, "Ouput" to "Output" above text box
 			Function: sendMessageMouseWheel() - created to reduce redundant code
 			
 			AHK
 			 * Updated to version 1.1.32.0
- 
- 2019.11.22: 
+
+ 2019.11.22:
 			TAB GENERAL MODEL.AHK
 			Function: SpacedColumnVerticalForAnySV - *SV (Spaced Columns V), also renamed existing function to *SV (Spaced Columns H)
 			 * Prints row data vertically, rather than horizontally
@@ -104,7 +162,7 @@ CHANGE LOG
              * Removed unnecessary comments and commented out code
              * Reviewing changes to reduce redundant code
  
- 2019.09.15: 
+ 2019.09.15:
 			GENERAL TAB
 			Function: HelperFilterColumnDataForAnySV
 			 * Created new reusable functions and trimmed down size of the function
@@ -115,7 +173,7 @@ CHANGE LOG
 			 * Now uses HelperDynamicallyFindHeightForInputBox for its prompt message
 				Prompt := "What character separates the data?"
 				Height := HelperDynamicallyFindHeightForInputBox(Prompt) ; (vPromptText)
-            
+
  2019.09.08:
 			GUI/ / Application
 			 * Changed font to fixed-width font (Consolas) for input/output text boxes
@@ -128,12 +186,15 @@ CHANGE LOG
 			 * Win+4 now toggles the GUI show/hide. Escape and GuiClose only hides when the GUI is on and then toggles state.
 			Function RemoveBlankLines
 			 * Changed the condition to break out of loop when removing all double CRLF and double LF
-             
+			Function GUtilityResultsLhsToFe
+			 * Added Line: RemoveBlankLines() ; Remove any blank lines - which can occur from a MG Workstation ScreenGrab on GUtility Results - Save the user a step - Function from General Tab
+			
  2019.08.30: ;Gui, Margin, 8, -10 - Commented out line so ListView/Tab would have perfect margins
 			Function: HelperExtractColumnDataForAnySV
 			 * Should work with any delimiter entered now
 			Function: HelperAskUserForDelim() - NEW
-			* When *SV function was used, `t or \t didn't resolve to a tab character, fixed now. - ExtractColumnDataForAnySV, SwapColumnForAnySV, FilterColumnDataForAnySV, SortDataByColumnForAnySV, SpacedColumnForAnySV		
+			* When *SV function was used, `t or \t didn't resolve to a tab character, fixed now. - ExtractColumnDataForAnySV, SwapColumnForAnySV, FilterColumnDataForAnySV, SortDataByColumnForAnySV, SpacedColumnForAnySV
+			Function: SirtTableStrip() - NEW - SIRT TSV (Clean Print)			
 			
  2019.08.25: Added # directive (#NoEnv), SendMode, SetWorkingDir at the top
              Moved MVC files to 'MVC' folder
@@ -145,7 +206,7 @@ CHANGE LOG
 ; #Warn						; Enable warnings to assist with detecting common errors.
 #NoEnv						; Recommended for performance and compatibility with future AutoHotkey releases.
 SendMode Input  			; Recommended for new scripts due to its superior speed and reliability.
-SetWorkingDir %A_ScriptDir%	; Ensures a consistent starting directory.
+;SetWorkingDir %A_ScriptDir%	; Ensures a consistent starting directory.
 
 ; 3rd Party Dependencies
 #Include %A_ScriptDir%\3rd Party\Text-to-Speech.ahk
@@ -154,14 +215,45 @@ SetWorkingDir %A_ScriptDir%	; Ensures a consistent starting directory.
 #Include %A_ScriptDir%\3rd Party\FGP - FileGetProperties.ahk
 
 ; My Library Dependencies
-#Include MyDSVTool.ahk		; Delimiter-Separated-Values Tool (CSV, TSV, etc.)
+#Include %A_ScriptDir%\MyDSVTool.ahk		; Delimiter-Separated-Values Tool (CSV, TSV, etc.)
+
 global myDSVTool := New MyDSVTool
+global appVersion := "ver. 1.0"
 
 ; Main Program
+
+; Add "File" Menu - Open Folder, Reload, Close, ExitApp
+Menu, AppMenuFileSubMenu, Add, Open Folder, FileMenuHandler
+Menu, AppMenuFileSubMenu, Add, Reload, FileMenuHandler
+Menu, AppMenuFileSubMenu, Add, Close, FileMenuHandler
+Menu, AppMenuFileSubMenu, Add, Exit App, FileMenuHandler
+
+; Add "Input" Menu - Clear, Copy, Paste, Process
+Menu, AppMenuInputSubMenu, Add, Clear, InputMenuHandler
+Menu, AppMenuInputSubMenu, Add, Copy, InputMenuHandler
+Menu, AppMenuInputSubmenu, Add, Paste, InputMenuHandler
+Menu, AppMenuInputSubmenu, Add, Process, InputMenuHandler
+
+; Add "Output" Menu - Copy, Move Up
+Menu, AppMenuOutputSubmenu, Add, Copy, OutputMenuHandler
+Menu, AppMenuOutputSubmenu, Add, Move Up, OutputMenuHandler
+
+; Add "Help" Menu - About This Tool
+Menu, AppMenuHelpSubmenu, Add, About Text Manipulation Tool, HelpMenuHandler
+
+; Add main menu - File, Edit, Input, Output, Options, About
+Menu, AppMenu, Add, File, :AppMenuFileSubMenu
+Menu, AppMenu, Add, Edit, AppMenu
+Menu, AppMenu, Add, Input, :AppMenuInputSubmenu
+Menu, AppMenu, Add, Output, :AppMenuOutputSubmenu
+Menu, AppMenu, Add, Options, AppMenu
+Menu, AppMenu, Add, Help, :AppMenuHelpSubmenu
+
+Gui, Menu, AppMenu
+
 ; Gui, New	; Breaks Gui hide/show ; This is a reminder
 ;Gui, Margin, 8, -10
 Gui, Add, Tab3, y+5 vTabVar, General|Programmer
-
 Gui, Tab, General,, Exact
 #Include %A_ScriptDir%\MVC\Tab General VIEW.ahk
 ;Gui, Add, Button, Hidden Default, OK ; Uncomment if General is the only tab
@@ -200,9 +292,9 @@ hMaxSize := A_ScreenHeight
 wMaxSize := A_ScreenWidth / 2
 
 Gui, +Resize +MinSize +MaxSize%wMaxSize%x%hMaxSize% -MinimizeBox	; MinSize with no suffix to use the window's current size as the limit
-;Gui, +MinSize +Resize 									; MinSize with no suffix to use the window's current size as the limit
-Gui, Show, w480 h425,Text Manipulation	                ; Application window appears centered on load
-;Gui, Show, Hide w480 h425,Text Manipulation
+;Gui, +MinSize +Resize 									            ; MinSize with no suffix to use the window's current size as the limit
+Gui, Show, w480 h425,Text Manipulation		                        ; Application window appears centered on load
+;Gui, Show, Hide w480 h425, Text Manipulation
 
 ; Force focus to first ListView initially
 ;~ GuiControl, Focus, MyListView
@@ -210,8 +302,100 @@ Gui, Show, w480 h425,Text Manipulation	                ; Application window appe
 
 return
 
+AppMenu:
+return
+
+FileMenuHandler:
+	;MsgBox You selected %A_ThisMenuItem% from the menu %A_ThisMenu%.
+	
+	switch A_ThisMenuItem
+	{
+		case "Open Folder":
+			vRunCommand := "explorer.exe /select,""" . A_ScriptFullPath . """"
+			Run, %vRunCommand%
+		return
+		
+		case "Reload":
+			Reload
+		return
+		
+		case "Close":
+			Gui, Hide
+		return
+		
+		case "Exit App":
+			ExitApp
+		return
+	}
+return
+
+InputMenuHandler:	
+	switch A_ThisMenuItem
+	{
+		case "Clear":
+			GuiControl,, EditInput,												; Sets input text box to nothing (clears it)
+			SB_SetText("Cleared all input text box.")
+		return
+			
+		case "Copy":
+			GuiControlGet, OutputVarOutput,,EditInput,Edit						; Gets output text box content
+			OutputVarStrReplace := StrReplace(OutputVarOutput, "`n", "`r`n")	; The "Edit" controls only have `n so need to add `r`n on "Copy"
+			Clipboard := OutputVarStrReplace									; Sets Windows Clipboard to updated output text box content
+			SB_SetText("Copied input to Windows Clipboard.")
+		return
+			
+		case "Paste":
+			if IsLabel("ButtonPaste")
+				gosub, ButtonPaste
+		return
+			
+		case "Process":
+			if IsLabel("ButtonProcess")
+				gosub, ButtonProcess
+		return
+			
+		default:
+		return
+	}
+return
+
+OutputMenuHandler:	
+	switch A_ThisMenuItem
+	{
+		case "Copy":
+			if IsLabel("ButtonCopy")
+				gosub, ButtonCopy
+			return
+			
+		case "Move Up":
+			if IsLabel("ButtonMoveUp")
+				gosub, ButtonMoveUp
+			return
+			
+		default:
+			return
+	}
+return
+
+HelpMenuHandler:
+	switch A_ThisMenuItem
+	{
+		case "About Text Manipulation":
+			MsgBox % "Text Manipulation Tool written by James Burns`r`nVersion: " appVersion
+			return
+			
+		default:
+			return
+	}
+return
+
+
 ; When GUI size changes:
 GuiSize:
+	;MsgBox % "GuiSize fired."
+	; Width: 480
+	; Height: 425
+	
 	if ( A_GuiHeight == 425 and A_GuiWidth == 480 )
 	{
 		; Normal size
@@ -235,7 +419,7 @@ GuiSize:
 		; Output	x17 y315 w330 h70
 		
 		hMaxEditInput := (A_ScreenHeight / 3) - 5
-        ;MsgBox % "hMaxEditInput: " hMaxEditInput
+		;MsgBox % "hMaxEditInput: " hMaxEditInput
 		
 		;hEditInput := (A_GuiHeight-355) / 1.5 < 150 ? (A_GuiHeight-355) / 1.5 : 150 ; Max Height = 580
 		hEditInput := (A_GuiHeight-355) / 1.5 < hMaxEditInput ? (A_GuiHeight-355) / 1.5 : hMaxEditInput ; Max Height = 580
@@ -281,7 +465,7 @@ return
 
 ; When GUI closes
 GuiClose:
-    Gui, Hide
+	Gui, Hide
 return
 
 #IfWinActive ahk_class AutoHotkeyGUI ; Do not block Escape key usage for non-AHK GUI Applications
@@ -300,9 +484,31 @@ return
 return
 */
 
+; CTRL+ALT+E to Edit this script
+^!e::
+	MsgBox, 4,, Program: Text Manipulation`nWould you like to edit the (main file) script?
+	IfMsgBox, Yes, Edit
+return
+
+; CTRL+ALT+F to open folder in File Explorer
+^!f::
+	MsgBox, 4,, Program: Text Manipulation`nOpen source code folder in File Explorer?
+	IfMsgBox, Yes
+		Run, %A_ScriptDir%
+return
+
+; Removed - Created "My AHK Script Reloader" to handle the reloading
+; CTRL+ALT+R to Reload this script
+;^!r::
+;	Reload
+;	Sleep 1000 ; If successful, the reload will close this instance during the Sleep, so the line below will never be reached.
+;	MsgBox, 4,, Program: Text Manipulation`nThe script could not be reloaded. Would you like to open it for editing?
+;	IfMsgBox, Yes, Edit
+;return
+
 ; When user hits escape while AutoHotkey GUI is active
 ESC::
-    Gui, Hide
+	Gui, Hide
 return
 
 Enter::
@@ -336,12 +542,10 @@ EnterKeyPressedOnListView()
 WheelDown::
 	GuiControlGet, OutputVarFocusedVariable, FocusV
 	GuiControlGet, Current_Tab,,TabVar
-    
-    ;if (DebuggerMode)
-	;	MsgBox % "DEBUG WheelDown FocusV: " OutputVarFocusedVariable
-    
-	;~ if ( OutputVarFocusedVariable == "MyListView" or Current_Tab == "General" )
-	;~else if ( OutputVarFocusedVariable == "MyListViewProg" or Current_Tab == "Programmer")
+	
+	;if (DebuggerMode)
+	;	MsgBox % "DEBUG WheelDown FocusV: " OutputVarFocusedVariable 
+	
 	; Prevents scrolling in textbox
 	if ( OutputVarFocusedVariable == "MyListView")
 	{
@@ -366,18 +570,16 @@ return
 WheelUp::
 	GuiControlGet, OutputVarFocusedVariable, FocusV
 	;GuiControlGet, Current_Tab,,TabVar
-    
-    ;if (DebuggerMode)
-	;	MsgBox % "DEBUG WheelUp FocusV: " OutputVarFocusedVariable
-    
-	;if ( OutputVarFocusedVariable == "MyListView" or Current_Tab == "General" )
-	;else if ( OutputVarFocusedVariable == "MyListViewProg" or Current_Tab == "Programmer" )
+	
+	;if (DebuggerMode)
+	;	MsgBox % "DEBUG WheelUp FocusV: " OutputVarFocusedVariable 
+	
 	; Prevents scrolling in textboxes
 	
 	if ( OutputVarFocusedVariable == "MyListView" )
 	{
-		;~Gui, ListView, MyListView
-		;~GuiControl,, MyListView
+		;~ Gui, ListView, MyListView
+		;~ GuiControl,, MyListView
 		sendmessage, 0x115, 0, 0,, ahk_id %MyListView% ; Works with hwndhlv on Gui, Add, ListView
 	}
 	else if ( OutputVarFocusedVariable == "MyListViewProg" )
@@ -397,23 +599,21 @@ return
 	; Scroll slowly for maximum effect
 	GuiControlGet, OutputVarFocusedVariable, FocusV
 	;GuiControlGet, Current_Tab,,TabVar
-    
-    ;if (DebuggerMode)
-	;	MsgBox % "DEBUG +WheelDown FocusV: " OutputVarFocusedVariable
-    
-	;if ( OutputVarFocusedVariable == "MyListView" or Current_Tab == "General" )
-	;else if ( OutputVarFocusedVariable == "MyListViewProg" or Current_Tab == "Programmer" )
+	
+	;if (DebuggerMode)
+	;	MsgBox % "DEBUG +WheelDown FocusV: " OutputVarFocusedVariable 
+	
 	if ( OutputVarFocusedVariable == "MyListView" )
 	{
 		Gui, ListView, MyListView
 		GuiControl,, MyListView
-        sendMessageMouseWheel(MyListView, "Down", 7) ; (vID, vDirection, vTimes := 0)
+		sendMessageMouseWheel(MyListView, "Down", 7) ; (vID, vDirection, vTimes := 0)
 	}
 	else if ( OutputVarFocusedVariable == "MyListViewProg" )
 	{
 		Gui, ListView, MyListViewProg
 		GuiControl,, MyListViewProg
-        sendMessageMouseWheel(MyListViewProg, "Down", 7) ; (vID, vDirection, vTimes := 0)
+		sendMessageMouseWheel(MyListViewProg, "Down", 7) ; (vID, vDirection, vTimes := 0)
 	}
 	else
 	{
@@ -422,26 +622,25 @@ return
 return
 
 +WheelUp::
-	;WheelLeft
 	; Horizontal scroll, WheelLeft
-    ;
+	; 
 	GuiControlGet, OutputVarFocusedVariable, FocusV
-    ;GuiControlGet, Current_Tab,,TabVar ; Does this need to be here?
+	;GuiControlGet, Current_Tab,,TabVar ; Does this need to be here?
 	
 	;if (DebuggerMode)
 	;	MsgBox % "DEBUG +WheelUp FocusV: " OutputVarFocusedVariable 
-    
+	
 	if ( OutputVarFocusedVariable == "MyListView"  or Current_Tab == "General" )
 	{
 		Gui, ListView, MyListView
 		GuiControl,, MyListView
-        sendMessageMouseWheel(MyListView, "Up", 7) ; (vID, vDirection, vTimes := 0)
+		sendMessageMouseWheel(MyListView, "Up", 7) ; (vID, vDirection, vTimes := 0)
 	}
 	else if ( OutputVarFocusedVariable == "MyListViewProg" or Current_Tab == "Programmer" )
 	{
 		Gui, ListView, MyListViewProg
 		GuiControl,, MyListViewProg
-        sendMessageMouseWheel(MyListViewProg, "Up", 7) ; (vID, vDirection, vTimes := 0)
+		sendMessageMouseWheel(MyListViewProg, "Up", 7) ; (vID, vDirection, vTimes := 0)
 	}
 	else
 	{
@@ -451,15 +650,14 @@ return
 
 sendMessageMouseWheel(vID, vDirection, vTimes := 0){
 	
-    Loop % vTimes
-    {
-        if ( vDirection == "Up" )
-            sendmessage, 0x114, 0, 0,, ahk_id %vID% ; Works with hwndhlv on Gui, Add, ListView ; 0x114 is WM_HSCROLL
-        else if ( vDirection == "Down" )
-            sendmessage, 0x114, 1, 0,, ahk_id %vID% ; Works with hwndhlv on Gui, Add, ListView ; 0x114 is WM_HSCROLL
-    }
+		Loop % vTimes
+		{
+			if ( vDirection == "Up" )
+				sendmessage, 0x114, 0, 0,, ahk_id %vID% ; Works with hwndhlv on Gui, Add, ListView ; 0x114 is WM_HSCROLL
+			else if ( vDirection == "Down" )
+				sendmessage, 0x114, 1, 0,, ahk_id %vID% ; Works with hwndhlv on Gui, Add, ListView ; 0x114 is WM_HSCROLL
+		}
 }
-
 
 #IfWinActive ; Restore hotkeys to work from any environment
 
@@ -485,8 +683,9 @@ WheelUp::
 	SendInput, {WheelUp} ; Do not prevent default behavior
 return
 
+
 #Include %A_ScriptDir%\MVC\Tab General CONTROLLER.ahk		; General Tab's Controller - button logic
 #Include %A_ScriptDir%\MVC\Tab General MODEL.ahk 			; Includes all the functions called upon by the General Tab's Functions
 
 #Include %A_ScriptDir%\MVC\Tab Programmer CONTROLLER.ahk	; Programmer Tab's Controller - button logic, listview initiator
-#Include %A_ScriptDir%\MVC\Tab Programmer MODEL.ahk		; Includes all the functions called upon by the Programmer Tab's Functions (unless shared with an existing function)
+#Include %A_ScriptDir%\MVC\Tab Programmer MODEL.ahk			; Includes all the functions called upon by the Programmer Tab's Functions (unless shared with an existing function)
